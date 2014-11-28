@@ -16,9 +16,15 @@
 package com.github.jinahya.simple.file.back;
 
 
+import java.util.Base64;
+import java.util.function.Function;
+import static java.util.stream.Collectors.joining;
+import java.util.stream.IntStream;
+
+
 /**
  *
- * @author Jin Kwon
+ * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
 public final class FileBackConstants {
 
@@ -35,12 +41,32 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/source_stream";
 
 
+    public static final String PROPERTY_SOURCE_CHANNEL
+        = PROPERTY_PREFIX + "/source_channel";
+
+
     public static final String PROPERTY_TARGET_STREAM
         = PROPERTY_PREFIX + "/target_stream";
 
 
+    public static final String PROPERTY_TARGET_CHANNEL
+        = PROPERTY_PREFIX + "/target_channel";
+
+
+    public static final String PROPERTY_PATH_NAME
+        = PROPERTY_PREFIX + "/path_name";
+
+
+    public static final String PROPERTY_PATH_EXIST
+        = PROPERTY_PREFIX + "/path_exist";
+
+
     public static final String PROPERTY_LOCATED_PATH
         = PROPERTY_PREFIX + "/located_path";
+
+
+    public static final String PROPERTY_FILE_EXIST
+        = PROPERTY_PREFIX + "/file_exist";
 
 
     public static final String PROPERTY_LOCATED_FILE
@@ -49,6 +75,17 @@ public final class FileBackConstants {
 
     public static final String PROPERTY_BYTES_COPIED
         = PROPERTY_PREFIX + "/bytes_copied";
+
+
+    public static final Function<byte[], String> IDENTIFIER_BASE64URL
+        = d -> Base64.getUrlEncoder().withoutPadding().encodeToString(d);
+
+
+    public static final Function<byte[], String> IDENTIFIER_HEX
+        = d -> IntStream.range(0, d.length * 2)
+        .map(i -> (d[i / 2] >> ((i & 1) == 0 ? 4 : 0)) & 0x0F)
+        .mapToObj(Integer::toHexString)
+        .collect(joining());
 
 
     private FileBackConstants() {

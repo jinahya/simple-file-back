@@ -16,15 +16,20 @@
 package com.github.jinahya.simple.file.back;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import static java.lang.invoke.MethodHandles.lookup;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import static java.util.concurrent.ThreadLocalRandom.current;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.testng.AssertJUnit.assertEquals;
 import org.testng.annotations.Test;
 
 
@@ -35,205 +40,67 @@ import org.testng.annotations.Test;
 public class LocalFileBackTest {
 
 
-    public static Path getRootFieldValue(final LocalFileBack fileBack)
-        throws NoSuchFieldException, IllegalAccessException {
+    private static final String ROOT_PATH_FIELD_NAME = "rootPath";
 
-        final Field field = LocalFileBack.class.getDeclaredField("root");
-        field.setAccessible(true);
 
-        return (Path) field.get(fileBack);
+    private static final Logger logger = getLogger(lookup().lookupClass());
+
+
+    public static Path getRootPathValue(final LocalFileBack fileBack) {
+
+        try {
+            final Field field
+                = LocalFileBack.class.getDeclaredField(ROOT_PATH_FIELD_NAME);
+            field.setAccessible(true);
+
+            try {
+                return (Path) field.get(fileBack);
+            } catch (final IllegalAccessException iae) {
+                throw new RuntimeException(iae);
+            }
+        } catch (final NoSuchFieldException nsfe) {
+            throw new RuntimeException(nsfe);
+        }
     }
 
 
-    public static void setRootFieldValue(final LocalFileBack fileBack,
-                                         final Path root)
-        throws NoSuchFieldException, IllegalAccessException {
+    public static void setRootPathValue(final LocalFileBack fileBack,
+                                        final Path rootPathValue) {
 
-        final Field field = LocalFileBack.class.getDeclaredField("root");
-        field.setAccessible(true);
+        try {
+            final Field field
+                = LocalFileBack.class.getDeclaredField(ROOT_PATH_FIELD_NAME);
+            field.setAccessible(true);
 
-        field.set(fileBack, root);
+            try {
+                field.set(fileBack, rootPathValue);
+            } catch (final IllegalAccessException iae) {
+                throw new RuntimeException(iae);
+            }
+        } catch (final NoSuchFieldException nsfe) {
+            throw new RuntimeException(nsfe);
+        }
     }
 
 
-//    @Test
-//    public static void locateWithNullIdentifier() throws IOException {
-//
-//        try {
-//            LocalFileBack.locate(null, 1, new File("."));
-//            fail("passed: locate(null, ...)");
-//        } catch (final NullPointerException npe) {
-//            // expected
-//        }
-//
-//        try {
-//            LocalFileBack.locate(null, 1, new File(".").toPath());
-//            fail("passed: locate(null, ...)");
-//        } catch (final NullPointerException npe) {
-//            // expected
-//        }
-//    }
-//
-//
-//    @Test
-//    public static void locateWithIllegalLength() throws IOException {
-//
-//        try {
-//            LocalFileBack.locate(
-//                "identifier", Integer.MIN_VALUE | current().nextInt(),
-//                new File("."));
-//            fail("passed: locate(, negative, ...)");
-//        } catch (final IllegalArgumentException iae) {
-//            // expected
-//        }
-//
-//        try {
-//            LocalFileBack.locate(
-//                "identifier", Integer.MIN_VALUE | current().nextInt(),
-//                new File(".").toPath());
-//            fail("passed: locate(, negative, ...)");
-//        } catch (final IllegalArgumentException iae) {
-//            // expected
-//        }
-//    }
-//
-//
-//    @Test
-//    public static void locateWithNullRoot() throws IOException {
-//
-//        try {
-//            LocalFileBack.locate("identifier", 1, (File) null);
-//            fail("passed: locate(, , null)");
-//        } catch (final NullPointerException npe) {
-//            // expected
-//        }
-//
-//        try {
-//            LocalFileBack.locate("identifier", 1, (Path) null);
-//            fail("passed: locate(, , null)");
-//        } catch (final NullPointerException npe) {
-//            // expected
-//        }
-//    }
-//
-//
-//    @Test
-//    public static void locateWithNonExistingRoot() throws IOException {
-//
-//        final File tempDir = Files.createTempDir();
-//        assertTrue(tempDir.isDirectory());
-//        tempDir.deleteOnExit();
-//
-//        final File nonExistingRoot = new File(tempDir, "test");
-//        assertFalse(nonExistingRoot.exists());
-//
-//        try {
-//            LocalFileBack.locate("identifier", 1, nonExistingRoot);
-//            fail("passed: locate(, , (non-exising))");
-//        } catch (final IllegalArgumentException iae) {
-//            // expected
-//        }
-//
-//        try {
-//            LocalFileBack.locate("identifier", 1,
-//                                 nonExistingRoot.toPath());
-//            fail("passed: locate(, , (non-exising))");
-//        } catch (final IllegalArgumentException iae) {
-//            // expected
-//        }
-//    }
-//
-//
-//    @Test
-//    public static void locateWithNonDirectoryRoot() throws IOException {
-//
-//        final Logger logger = getLogger(lookup().lookupClass());
-//
-//        final File nonDirectoryRoot = File.createTempFile("test", "test");
-//        assertTrue(nonDirectoryRoot.isFile());
-//        nonDirectoryRoot.deleteOnExit();
-//
-//        try {
-//            LocalFileBack.locate("identifier", 1, nonDirectoryRoot);
-//            fail("passed: locate(, , (non-directory))");
-//        } catch (final IllegalArgumentException iae) {
-//            // expected
-//        }
-//
-//        try {
-//            LocalFileBack.locate("identifier", 1, nonDirectoryRoot.toPath());
-//            fail("passed: locate(, , (non-directory))");
-//        } catch (final IllegalArgumentException iae) {
-//            // expected
-//        }
-//    }
-//
-//
-//    @Test(invocationCount = 128)
-//    public static void locate() throws IOException {
-//
-//        final Logger logger = getLogger(lookup().lookupClass());
-//
-//        final File rootFile = Files.createTempDir();
-//        assertTrue(rootFile.isDirectory());
-//        rootFile.deleteOnExit();
-//        final File locatedFile
-//            = LocalFileBack.locate("identifier", 3, rootFile);
-//        logger.debug("locatedFile: {}", locatedFile);
-//        assertTrue(locatedFile.getParentFile().isDirectory());
-//
-//        final File tempDir = Files.createTempDir();
-//        assertTrue(tempDir.isDirectory());
-//        tempDir.deleteOnExit();
-//        final Path rootPath = tempDir.toPath();
-//        final Path locatedPath
-//            = LocalFileBack.locate("identifier", 3, rootPath);
-//        logger.debug("locatedPath: {}", locatedPath);
-//        assertTrue(locatedPath.toFile().getParentFile().isDirectory());
-//    }
-//
-//
-//    @Test(invocationCount = 128)
-//    public void read() throws IOException, ReflectiveOperationException {
-//
-//        final File rootFile = Files.createTempDir();
-//        assertTrue(rootFile.isDirectory());
-//        rootFile.deleteOnExit();
-//
-//        final byte[] key = new byte[current().nextInt(1, 128)];
-//        current().nextBytes(key);
-//
-//        final String identifier = FileBack.identify(
-//            Channels.newChannel(new ByteArrayInputStream(key)));
-//        final File located = LocalFileBack.locate(identifier, LocalFileBack.LENGTH, rootFile);
-//
-//        byte[] content = null;
-//        if (current().nextBoolean()) {
-//            content = new byte[current().nextInt(0, 128)];
-//            current().nextBytes(content);
-//            Files.write(content, located);
-//        }
-//
-//        final LocalFileBack fileBack = new LocalFileBack();
-//        setRootFile(fileBack, rootFile);
-//
-//        final ByteArrayOutputStream target = new ByteArrayOutputStream();
-//
-//        try {
-//            fileBack.read(key, target);
-//            target.flush();
-//            assertEquals(target.toByteArray(), content);
-//        } catch (final FileNotFoundException fnfe) {
-//            if (!located.isFile()) {
-//                // expected;
-//            }
-//            throw fnfe;
-//        }
-//    }
+    private static FileBack newInstance() {
+
+        return new LocalRootPathModule().inject(LocalFileBack.class);
+    }
+
+
+    private static FileBack injectInstance(final LocalFileBack fileBack) {
+
+        if (fileBack == null) {
+            throw new NullPointerException("null fileBack");
+        }
+
+        return new LocalRootPathModule().inject(fileBack);
+    }
+
+
     @Test
     public static void locate() throws IOException {
-
-        final Logger logger = getLogger(lookup().lookupClass());
 
         final Path rootPath = Files.createTempDirectory("tmp");
         logger.debug("rootPath: {}", rootPath);
@@ -245,6 +112,72 @@ public class LocalFileBackTest {
         final Path locatedPath = LocalFileBack.locate(rootPath, keyBytes);
         logger.debug("locatedPath: {}", locatedPath);
     }
+
+
+    @Test
+    public void read() throws IOException {
+
+        final FileBack fileBack = newInstance();
+        final Path rootPath = getRootPathValue((LocalFileBack) fileBack);
+
+        final byte[] keyBytes = FileBackTests.randomKeyBytes();
+        final Path locatedPath = LocalFileBack.locate(rootPath, keyBytes);
+        logger.debug("locatedPath: {}", locatedPath);
+        final byte[] expected = new byte[current().nextInt(0, 1024)];
+        current().nextBytes(expected);
+        Files.write(locatedPath, expected, StandardOpenOption.CREATE_NEW,
+                    StandardOpenOption.WRITE);
+        logger.debug("written: {}", Arrays.toString(expected));
+
+        final FileContext fileContext = mock(FileContext.class);
+        when(fileContext.getProperty(FileBackConstants.PROPERTY_KEY_BYTES))
+            .thenReturn(keyBytes);
+        final ByteArrayOutputStream targetStream
+            = new ByteArrayOutputStream(expected.length);
+        when(fileContext.getProperty(
+            FileBackConstants.PROPERTY_TARGET_STREAM))
+            .thenReturn(targetStream);
+
+        fileBack.read(fileContext);
+
+        final byte[] actual = targetStream.toByteArray();
+
+        assertEquals(actual, expected);
+    }
+
+
+    @Test(enabled = false)
+    public void write() throws IOException {
+
+        final FileBack fileBack = newInstance();
+        final Path rootPath = getRootPathValue((LocalFileBack) fileBack);
+
+        final byte[] keyBytes = FileBackTests.randomKeyBytes();
+        final Path locatedPath = LocalFileBack.locate(rootPath, keyBytes);
+        logger.debug("locatedPath: {}", locatedPath);
+        final byte[] expected = new byte[current().nextInt(0, 1024)];
+        current().nextBytes(expected);
+        Files.write(locatedPath, expected, StandardOpenOption.CREATE_NEW,
+                    StandardOpenOption.WRITE);
+        logger.debug("written: {}", Arrays.toString(expected));
+
+        final FileContext fileContext = mock(FileContext.class);
+        when(fileContext.getProperty(FileBackConstants.PROPERTY_KEY_BYTES))
+            .thenReturn(keyBytes);
+        final ByteArrayOutputStream targetStream
+            = new ByteArrayOutputStream(expected.length);
+        when(fileContext.getProperty(
+            FileBackConstants.PROPERTY_TARGET_STREAM))
+            .thenReturn(targetStream);
+
+        fileBack.read(fileContext);
+
+        final byte[] actual = targetStream.toByteArray();
+
+        assertEquals(actual, expected);
+    }
+
+
 
 
 }

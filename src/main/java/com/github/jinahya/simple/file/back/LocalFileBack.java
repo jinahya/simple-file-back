@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.function.Function;
 import javax.inject.Inject;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ public class LocalFileBack implements FileBack {
 
 
     public static final Function<byte[], String> IDENTIFIER_FUNCTION
-        = d -> Base64.getUrlEncoder().withoutPadding().encodeToString(d);
+        = FileBackConstants.IDENTIFIER_HEX;
 
 
     /**
@@ -97,6 +96,7 @@ public class LocalFileBack implements FileBack {
             Files.createDirectories(parent);
             logger.debug("parent created");
         }
+        assert Files.isDirectory(parent);
 
         return located;
     }
@@ -117,9 +117,9 @@ public class LocalFileBack implements FileBack {
             throw new NullPointerException("null fileContext");
         }
 
-        final OutputStream fileTarget
+        final OutputStream targetStream
             = FileBackUtilities.getTargetStream(fileContext);
-        logger.debug("fileTarget: {}", fileTarget);
+        logger.debug("stargetStream: {}", targetStream);
 
         final byte[] keyByts = FileBackUtilities.getKeyBytes(fileContext);
         logger.debug("keyBytes: {}", keyByts);
@@ -129,7 +129,7 @@ public class LocalFileBack implements FileBack {
         fileContext.putProperty(FileBackConstants.PROPERTY_LOCATED_PATH,
                                 locatedPath);
 
-        final long bytesCopied = Files.copy(locatedPath, fileTarget);
+        final long bytesCopied = Files.copy(locatedPath, targetStream);
         logger.debug("bytesCopied: {}", bytesCopied);
         fileContext.putProperty(FileBackConstants.PROPERTY_BYTES_COPIED,
                                 bytesCopied);
