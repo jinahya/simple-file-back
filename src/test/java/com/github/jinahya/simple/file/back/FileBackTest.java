@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 
 

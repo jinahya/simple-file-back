@@ -41,12 +41,28 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/source_stream";
 
 
+    /**
+     * The value mapped to this property name must be an instance of
+     * {@code Supplier<InputStream>}
+     */
+    public static final String PROPERTY_SOURCE_STREAM_SUPPLIER
+        = PROPERTY_PREFIX + "/source_stream_supplier";
+
+
     public static final String PROPERTY_SOURCE_CHANNEL
         = PROPERTY_PREFIX + "/source_channel";
 
 
     public static final String PROPERTY_TARGET_STREAM
         = PROPERTY_PREFIX + "/target_stream";
+
+
+    /**
+     * The value mapped to this property name must be an instance of
+     * {@code Supplier<OutputStream>}.
+     */
+    public static final String PROPERTY_TARGET_STREAM_SUPPLIER
+        = PROPERTY_PREFIX + "/target_stream_supplier";
 
 
     public static final String PROPERTY_TARGET_CHANNEL
@@ -57,6 +73,7 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/path_name";
 
 
+    @Deprecated
     public static final String PROPERTY_PATH_EXIST
         = PROPERTY_PREFIX + "/path_exist";
 
@@ -65,6 +82,15 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/located_path";
 
 
+    public static final String PROPERTY_LOCATED_PATH_EXIST
+        = PROPERTY_PREFIX + "/located_path_exist";
+
+
+    public static final String PROPERTY_LOCATED_PATH_LENGTH
+        = PROPERTY_PREFIX + "/located_path_length";
+
+
+    @Deprecated
     public static final String PROPERTY_FILE_EXIST
         = PROPERTY_PREFIX + "/file_exist";
 
@@ -73,14 +99,33 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/located_file";
 
 
+    public static final String PROPERTY_LOCATED_FILE_EXIST
+        = PROPERTY_PREFIX + "/located_file_exist";
+
+
+    public static final String PROPERTY_LOCATED_FILE_LENGTH
+        = PROPERTY_PREFIX + "/located_file_length";
+
+
+    /**
+     * A property name for number of bytes copied from/to the source/target
+     * stream/channel.
+     */
     public static final String PROPERTY_BYTES_COPIED
         = PROPERTY_PREFIX + "/bytes_copied";
 
 
+    /**
+     * An identifier function converting digested bytes to a base64url string.
+     */
+    @Deprecated
     public static final Function<byte[], String> IDENTIFIER_BASE64URL
         = d -> Base64.getUrlEncoder().withoutPadding().encodeToString(d);
 
 
+    /**
+     * An identifier function converting digested bytes to a hex string.
+     */
     public static final Function<byte[], String> IDENTIFIER_HEX
         = d -> IntStream.range(0, d.length * 2)
         .map(i -> (d[i / 2] >> ((i & 1) == 0 ? 4 : 0)) & 0x0F)

@@ -33,7 +33,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  *
- * @author Jin Kwon
+ * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
 public class LocalFileBack implements FileBack {
 
@@ -42,7 +42,7 @@ public class LocalFileBack implements FileBack {
         = FileBackConstants.PROPERTY_PREFIX + "/local_file_back";
 
 
-    public static final String DIGEST_ALGORITHM = "SHA-1"; // 160bits/20bytes/40hexes
+    public static final String DIGEST_ALGORITHM = "SHA-1"; // 160 bits
 
 
     public static final Function<byte[], String> IDENTIFIER_FUNCTION
@@ -55,50 +55,46 @@ public class LocalFileBack implements FileBack {
     public static final int TOKEN_LENGTH = 3;
 
 
-    public static Path locate(final Path rootPath, final byte[] keyBytes)
+    static Path locate(final Path rootPath, final FileContext fileContext,
+                       final boolean createParent)
         throws IOException {
 
         final Logger logger = getLogger(lookup().lookupClass());
 
-        if (rootPath == null) {
-            throw new NullPointerException("null rootPath");
-        }
+        final byte[] keyBytes = FileBackUtilities.getKeyBytes(fileContext);
+        logger.debug("keyBytes: {}", Arrays.toString(keyBytes));
 
-        if (!Files.isDirectory(rootPath)) {
-            throw new IllegalArgumentException(
-                "rootPath(" + rootPath + ") is not a directory");
+        final String joined;
+        try {
+            joined = FileBackUtilities.join(
+                keyBytes, DIGEST_ALGORITHM, IDENTIFIER_FUNCTION,
+                TOKEN_LENGTH, "/");
+        } catch (final NoSuchAlgorithmException nsae) {
+            throw new RuntimeException(nsae);
         }
+        final String pathName = "/" + joined;
+        logger.debug("pathName: {}", pathName);
+        fileContext.putProperty(FileBackConstants.PROPERTY_PATH_NAME, pathName);
 
-        if (keyBytes == null) {
-            throw new NullPointerException("null keyBytes");
-        }
-
-        if (keyBytes.length == 0) {
-            throw new IllegalArgumentException(
-                "keyBytes.length(" + keyBytes.length + ") == 0");
-        }
-
-        final Path located;
-        {
-            try {
-                located = rootPath.resolve(FileBackUtilities.join(
-                    keyBytes, DIGEST_ALGORITHM, IDENTIFIER_FUNCTION,
-                    TOKEN_LENGTH, rootPath.getFileSystem().getSeparator()));
-            } catch (final NoSuchAlgorithmException nsae) {
-                throw new RuntimeException(nsae);
+        final Path locatedPath = rootPath.resolve(
+            joined.replace("/", rootPath.getFileSystem().getSeparator()));
+        logger.debug("locatedPath: {}", locatedPath);
+        fileContext.putProperty(FileBackConstants.PROPERTY_LOCATED_PATH,
+                                locatedPath);
+        if (createParent) {
+            final Path parent = locatedPath.getParent();
+            if (!Files.isDirectory(parent)) {
+                Files.createDirectories(parent);
+                logger.debug("parent created: {}", parent);
             }
         }
-        logger.debug("located: {}", located);
+        fileContext.putProperty(FileBackConstants.PROPERTY_LOCATED_PATH_EXIST,
+                                Files.isRegularFile(locatedPath));
+        fileContext.putProperty(
+            FileBackConstants.PROPERTY_LOCATED_PATH_LENGTH,
+            Files.isRegularFile(locatedPath) ? Files.size(locatedPath) : null);
 
-        final Path parent = located.getParent();
-        logger.debug("parent: {}", parent);
-        if (!Files.isDirectory(parent)) {
-            Files.createDirectories(parent);
-            logger.debug("parent created");
-        }
-        assert Files.isDirectory(parent);
-
-        return located;
+        return locatedPath;
     }
 
 
@@ -111,23 +107,32 @@ public class LocalFileBack implements FileBack {
 
 
     @Override
+    public void create(final FileContext fileContext) throws IOException {
+
+        throw new UnsupportedOperationException("not supported: create");
+    }
+
+
+    @Override
     public void read(final FileContext fileContext) throws IOException {
 
         if (fileContext == null) {
             throw new NullPointerException("null fileContext");
         }
 
+        final Path locatedPath = locate(rootPath, fileContext, false);
+
+        if (!Files.isReadable(locatedPath)) {
+            logger.debug("locatedPath is not readable: {}", locatedPath);
+            return;
+        }
+
         final OutputStream targetStream
             = FileBackUtilities.getTargetStream(fileContext);
-        logger.debug("stargetStream: {}", targetStream);
-
-        final byte[] keyByts = FileBackUtilities.getKeyBytes(fileContext);
-        logger.debug("keyBytes: {}", keyByts);
-
-        final Path locatedPath = locate(rootPath, keyByts);
-        logger.debug("locatedPath: {}", locatedPath);
-        fileContext.putProperty(FileBackConstants.PROPERTY_LOCATED_PATH,
-                                locatedPath);
+        logger.debug("targetStream: {}", targetStream);
+        if (targetStream == null) {
+            throw new NullPointerException("null targetStream");
+        }
 
         final long bytesCopied = Files.copy(locatedPath, targetStream);
         logger.debug("bytesCopied: {}", bytesCopied);
@@ -137,30 +142,45 @@ public class LocalFileBack implements FileBack {
 
 
     @Override
-    public void write(final FileContext fileContext) throws IOException {
+    public void update(final FileContext fileContext) throws IOException {
 
         if (fileContext == null) {
             throw new NullPointerException("null fileContext");
         }
 
-        final InputStream fileSource
+        final Path locatedPath = locate(rootPath, fileContext, true);
+
+        if (false && !Files.isWritable(locatedPath)) {
+            logger.warn("locatedPath is not writable: {}", locatedPath);
+            return;
+        }
+
+        final InputStream sourceStream
             = FileBackUtilities.getSourceStream(fileContext);
-        logger.debug("fileSource: {}", fileSource);
-
-        final byte[] keyBytes = FileBackUtilities.getKeyBytes(fileContext);
-        logger.debug("keyBytes: {}", Arrays.toString(keyBytes));
-
-        final Path locatedPath = locate(rootPath, keyBytes);
-        logger.debug("locatedPath: {}", locatedPath);
-        fileContext.putProperty(FileBackConstants.PROPERTY_LOCATED_PATH,
-                                locatedPath);
+        logger.debug("sourceStream: {}", sourceStream);
+        if (sourceStream == null) {
+            throw new IllegalArgumentException("null sourceStream");
+        }
 
         final long bytesCopied = Files.copy(
-            fileSource, locatedPath, StandardCopyOption.ATOMIC_MOVE,
-            StandardCopyOption.REPLACE_EXISTING);
+            sourceStream, locatedPath, StandardCopyOption.REPLACE_EXISTING);
         logger.debug("bytesCopied: {}", bytesCopied);
         fileContext.putProperty(FileBackConstants.PROPERTY_BYTES_COPIED,
                                 bytesCopied);
+    }
+
+
+    @Override
+    public void delete(final FileContext fileContext) throws IOException {
+
+        if (fileContext == null) {
+            throw new NullPointerException("null fileContext");
+        }
+
+        final Path locatedPath = locate(rootPath, fileContext, false);
+
+        final boolean deleted = Files.deleteIfExists(locatedPath);
+        logger.debug("deleted: {}", deleted);
     }
 
 

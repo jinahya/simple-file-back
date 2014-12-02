@@ -16,6 +16,7 @@
 package com.github.jinahya.simple.file.back;
 
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import static java.lang.invoke.MethodHandles.lookup;
@@ -24,12 +25,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.Optional;
 import static java.util.concurrent.ThreadLocalRandom.current;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
 
 
@@ -99,61 +102,43 @@ public class LocalFileBackTest {
     }
 
 
-    @Test
+    @Test(enabled = false, invocationCount = 128)
     public static void locate() throws IOException {
 
         final Path rootPath = Files.createTempDirectory("tmp");
         logger.debug("rootPath: {}", rootPath);
+        rootPath.toFile().deleteOnExit();
 
         final byte[] keyBytes = new byte[current().nextInt(1, 128)];
         current().nextBytes(keyBytes);
         logger.debug("keyBytes: {}", Arrays.toString(keyBytes));
 
-        final Path locatedPath = LocalFileBack.locate(rootPath, keyBytes);
-        logger.debug("locatedPath: {}", locatedPath);
-    }
-
-
-    @Test
-    public void read() throws IOException {
-
-        final FileBack fileBack = newInstance();
-        final Path rootPath = getRootPathValue((LocalFileBack) fileBack);
-
-        final byte[] keyBytes = FileBackTests.randomKeyBytes();
-        final Path locatedPath = LocalFileBack.locate(rootPath, keyBytes);
-        logger.debug("locatedPath: {}", locatedPath);
-        final byte[] expected = new byte[current().nextInt(0, 1024)];
-        current().nextBytes(expected);
-        Files.write(locatedPath, expected, StandardOpenOption.CREATE_NEW,
-                    StandardOpenOption.WRITE);
-        logger.debug("written: {}", Arrays.toString(expected));
-
         final FileContext fileContext = mock(FileContext.class);
         when(fileContext.getProperty(FileBackConstants.PROPERTY_KEY_BYTES))
-            .thenReturn(keyBytes);
-        final ByteArrayOutputStream targetStream
-            = new ByteArrayOutputStream(expected.length);
-        when(fileContext.getProperty(
-            FileBackConstants.PROPERTY_TARGET_STREAM))
-            .thenReturn(targetStream);
+            .thenReturn(Optional.of(keyBytes));
 
-        fileBack.read(fileContext);
-
-        final byte[] actual = targetStream.toByteArray();
-
-        assertEquals(actual, expected);
+        final Path locatedPath
+            = LocalFileBack.locate(rootPath, fileContext, true);
+        logger.debug("locatedPath: {}", locatedPath);
+        assertTrue(Files.isDirectory(locatedPath.getParent()));
     }
 
 
     @Test(enabled = false)
-    public void write() throws IOException {
+    public void read() throws IOException {
 
         final FileBack fileBack = newInstance();
         final Path rootPath = getRootPathValue((LocalFileBack) fileBack);
+        rootPath.toFile().deleteOnExit();
 
         final byte[] keyBytes = FileBackTests.randomKeyBytes();
-        final Path locatedPath = LocalFileBack.locate(rootPath, keyBytes);
+
+        final FileContext fileContext = mock(FileContext.class);
+        when(fileContext.getProperty(FileBackConstants.PROPERTY_KEY_BYTES))
+            .thenReturn(Optional.of(keyBytes));
+
+        final Path locatedPath
+            = LocalFileBack.locate(rootPath, fileContext, true);
         logger.debug("locatedPath: {}", locatedPath);
         final byte[] expected = new byte[current().nextInt(0, 1024)];
         current().nextBytes(expected);
@@ -161,14 +146,11 @@ public class LocalFileBackTest {
                     StandardOpenOption.WRITE);
         logger.debug("written: {}", Arrays.toString(expected));
 
-        final FileContext fileContext = mock(FileContext.class);
-        when(fileContext.getProperty(FileBackConstants.PROPERTY_KEY_BYTES))
-            .thenReturn(keyBytes);
         final ByteArrayOutputStream targetStream
             = new ByteArrayOutputStream(expected.length);
         when(fileContext.getProperty(
             FileBackConstants.PROPERTY_TARGET_STREAM))
-            .thenReturn(targetStream);
+            .thenReturn(Optional.of(targetStream));
 
         fileBack.read(fileContext);
 
@@ -178,6 +160,40 @@ public class LocalFileBackTest {
     }
 
 
+    @Test
+    public void update() throws IOException {
+
+        final FileBack fileBack = newInstance();
+        final Path rootPath = getRootPathValue((LocalFileBack) fileBack);
+        rootPath.toFile().deleteOnExit();
+
+        final byte[] keyBytes = FileBackTests.randomKeyBytes();
+        logger.debug("keyBytes: {}", Arrays.toString(keyBytes));
+
+        final FileContext fileContext = mock(FileContext.class);
+        when(fileContext.getProperty(FileBackConstants.PROPERTY_KEY_BYTES))
+            .thenReturn(Optional.of(keyBytes));
+
+        final Path locatedPath
+            = LocalFileBack.locate(rootPath, fileContext, true);
+        logger.debug("locatedPath: {}", locatedPath);
+        final byte[] expected = new byte[current().nextInt(0, 1024)];
+        current().nextBytes(expected);
+        logger.debug("expected: {}", Arrays.toString(expected));
+
+        final ByteArrayInputStream sourceStream
+            = new ByteArrayInputStream(expected);
+        when(fileContext.getProperty(
+            FileBackConstants.PROPERTY_SOURCE_STREAM))
+            .thenReturn(Optional.of(sourceStream));
+
+        fileBack.update(fileContext);
+
+        final byte[] actual = Files.readAllBytes(locatedPath);
+        logger.debug("read: {}", Arrays.toString(actual));
+
+        assertEquals(actual, expected);
+    }
 
 
 }

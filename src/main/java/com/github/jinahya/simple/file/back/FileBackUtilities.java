@@ -18,11 +18,15 @@ package com.github.jinahya.simple.file.back;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import static java.lang.invoke.MethodHandles.lookup;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 import java.util.function.Function;
 import static java.util.stream.Collectors.joining;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import static org.slf4j.LoggerFactory.getLogger;
 
 
 /**
@@ -99,19 +103,21 @@ public final class FileBackUtilities {
             throw new NullPointerException("null fileContext");
         }
 
-        final Object value = fileContext.getProperty(propertyName);
-        if (value == null) {
+        final Optional<Object> value = fileContext.getProperty(propertyName);
+        if (!value.isPresent()) {
             throw new IllegalArgumentException(
                 "no property for " + propertyName + " in " + fileContext);
         }
 
-        return value;
+        return value.get();
     }
 
 
     public static <T> T getProperty(final FileContext fileContext,
                                     final String propertyName,
                                     final Class<T> propertyType) {
+
+        final Logger logger = getLogger(lookup().lookupClass());
 
         if (fileContext == null) {
             throw new NullPointerException("null fileContext");
@@ -120,7 +126,8 @@ public final class FileBackUtilities {
         final Object value = getProperty(fileContext, propertyName);
         assert value != null;
 
-        if (!(propertyType.isInstance(value))) {
+        logger.debug("value: {}", value);
+        if (!propertyType.isInstance(value)) {
             throw new IllegalArgumentException(
                 "no property of " + propertyType + " for " + propertyName
                 + " in " + fileContext);

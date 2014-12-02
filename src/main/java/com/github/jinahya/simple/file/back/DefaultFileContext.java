@@ -18,6 +18,7 @@ package com.github.jinahya.simple.file.back;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -28,28 +29,28 @@ public class DefaultFileContext implements FileContext {
 
 
     @Override
-    public Object getProperty(final String name) {
+    public Optional<Object> getProperty(final String name) {
 
         if (name == null) {
             throw new NullPointerException("null name");
         }
 
-        return properties().get(name);
+        return Optional.ofNullable(properties().get(name));
     }
 
 
     @Override
-    public Object putProperty(final String name, final Object value) {
+    public Optional<Object> putProperty(final String name, final Object value) {
 
         if (name == null) {
             throw new NullPointerException("null name");
         }
 
         if (value == null) {
-            return properties().remove(name);
+            return Optional.ofNullable(properties().remove(name));
         }
 
-        return properties().put(name, value);
+        return Optional.ofNullable(properties().put(name, value));
     }
 
 

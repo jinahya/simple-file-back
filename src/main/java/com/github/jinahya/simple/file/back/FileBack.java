@@ -25,10 +25,16 @@ import java.io.IOException;
 public interface FileBack {
 
 
+    void create(FileContext context) throws IOException;
+
+
     void read(FileContext context) throws IOException;
 
 
-    void write(FileContext context) throws IOException;
+    void update(FileContext context) throws IOException;
+
+
+    void delete(FileContext context) throws IOException;
 
 
 }

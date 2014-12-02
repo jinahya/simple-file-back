@@ -16,6 +16,9 @@
 package com.github.jinahya.simple.file.back;
 
 
+import java.util.Optional;
+
+
 /**
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
@@ -24,22 +27,26 @@ public interface FileContext {
 
 
     /**
+     * Returns the property value mapped to specified {@code name}.
      *
-     * @param name
+     * @param name the name of the property
      *
-     * @return
+     * @return an optional of the value of property mapped to specified
+     * {@code name}.
      */
-    Object getProperty(String name);
+    Optional<Object> getProperty(String name);
 
 
     /**
+     * Sets a property value mapped to specified {@code name}. The property will
+     * be removed if {@code value} is {@code null}.
      *
-     * @param name
-     * @param value
+     * @param name the name of the property
+     * @param value the new value of the property.
      *
-     * @return
+     * @return an optional of previous value.
      */
-    Object putProperty(String name, Object value);
+    Optional<Object> putProperty(String name, Object value);
 
 
 }
