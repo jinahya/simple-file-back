@@ -17,9 +17,10 @@ package com.github.jinahya.simple.file.back;
 
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import static java.lang.invoke.MethodHandles.lookup;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -55,14 +56,17 @@ public class LocalFileBack implements FileBack {
     public static final int TOKEN_LENGTH = 3;
 
 
-    static Path locate(final Path rootPath, final FileContext fileContext,
-                       final boolean createParent)
-        throws IOException {
+    static Path localPath(final Path rootPath, final FileContext fileContext,
+                          final boolean createParent)
+        throws IOException, FileBackException {
 
         final Logger logger = getLogger(lookup().lookupClass());
 
-        final byte[] keyBytes = FileBackUtilities.getKeyBytes(fileContext);
+        final byte[] keyBytes = fileContext.keyBytes();
         logger.debug("keyBytes: {}", Arrays.toString(keyBytes));
+        if (keyBytes == null) {
+            throw new FileBackException("no keyBytes supplied");
+        }
 
         final String joined;
         try {
@@ -74,27 +78,22 @@ public class LocalFileBack implements FileBack {
         }
         final String pathName = "/" + joined;
         logger.debug("pathName: {}", pathName);
-        fileContext.putProperty(FileBackConstants.PROPERTY_PATH_NAME, pathName);
+        fileContext.acceptPathName(() -> pathName);
 
-        final Path locatedPath = rootPath.resolve(
+        final Path localPath = rootPath.resolve(
             joined.replace("/", rootPath.getFileSystem().getSeparator()));
-        logger.debug("locatedPath: {}", locatedPath);
-        fileContext.putProperty(FileBackConstants.PROPERTY_LOCATED_PATH,
-                                locatedPath);
+        logger.debug("localPath: {}", localPath);
+        fileContext.acceptLocalPath(() -> localPath);
+
         if (createParent) {
-            final Path parent = locatedPath.getParent();
+            final Path parent = localPath.getParent();
             if (!Files.isDirectory(parent)) {
                 Files.createDirectories(parent);
                 logger.debug("parent created: {}", parent);
             }
         }
-        fileContext.putProperty(FileBackConstants.PROPERTY_LOCATED_PATH_EXIST,
-                                Files.isRegularFile(locatedPath));
-        fileContext.putProperty(
-            FileBackConstants.PROPERTY_LOCATED_PATH_LENGTH,
-            Files.isRegularFile(locatedPath) ? Files.size(locatedPath) : null);
 
-        return locatedPath;
+        return localPath;
     }
 
 
@@ -107,79 +106,77 @@ public class LocalFileBack implements FileBack {
 
 
     @Override
-    public void create(final FileContext fileContext) throws IOException {
+    public void create(final FileContext fileContext)
+        throws IOException, FileBackException {
 
         throw new UnsupportedOperationException("not supported: create");
     }
 
 
     @Override
-    public void read(final FileContext fileContext) throws IOException {
+    public void read(final FileContext fileContext)
+        throws IOException, FileBackException {
 
         if (fileContext == null) {
             throw new NullPointerException("null fileContext");
         }
 
-        final Path locatedPath = locate(rootPath, fileContext, false);
+        final Path localPath = localPath(rootPath, fileContext, false);
 
-        if (!Files.isReadable(locatedPath)) {
-            logger.debug("locatedPath is not readable: {}", locatedPath);
+        if (!Files.isReadable(localPath)) {
+            logger.warn("localPath is not readable: {}", localPath);
             return;
         }
 
-        final OutputStream targetStream
-            = FileBackUtilities.getTargetStream(fileContext);
-        logger.debug("targetStream: {}", targetStream);
-        if (targetStream == null) {
-            throw new NullPointerException("null targetStream");
-        }
-
-        final long bytesCopied = Files.copy(locatedPath, targetStream);
-        logger.debug("bytesCopied: {}", bytesCopied);
-        fileContext.putProperty(FileBackConstants.PROPERTY_BYTES_COPIED,
-                                bytesCopied);
-    }
-
-
-    @Override
-    public void update(final FileContext fileContext) throws IOException {
-
-        if (fileContext == null) {
-            throw new NullPointerException("null fileContext");
-        }
-
-        final Path locatedPath = locate(rootPath, fileContext, true);
-
-        if (false && !Files.isWritable(locatedPath)) {
-            logger.warn("locatedPath is not writable: {}", locatedPath);
-            return;
-        }
-
-        final InputStream sourceStream
-            = FileBackUtilities.getSourceStream(fileContext);
-        logger.debug("sourceStream: {}", sourceStream);
-        if (sourceStream == null) {
-            throw new IllegalArgumentException("null sourceStream");
+        final WritableByteChannel targetChannel
+            = fileContext.targetChannel();
+        logger.debug("targetStream: {}", targetChannel);
+        if (targetChannel == null) {
+            throw new FileBackException("no targetStream");
         }
 
         final long bytesCopied = Files.copy(
-            sourceStream, locatedPath, StandardCopyOption.REPLACE_EXISTING);
+            localPath, Channels.newOutputStream(targetChannel));
         logger.debug("bytesCopied: {}", bytesCopied);
-        fileContext.putProperty(FileBackConstants.PROPERTY_BYTES_COPIED,
-                                bytesCopied);
+        fileContext.acceptBytesCopied(() -> bytesCopied);
     }
 
 
     @Override
-    public void delete(final FileContext fileContext) throws IOException {
+    public void update(final FileContext fileContext)
+        throws IOException, FileBackException {
 
         if (fileContext == null) {
             throw new NullPointerException("null fileContext");
         }
 
-        final Path locatedPath = locate(rootPath, fileContext, false);
+        final Path localPath = localPath(rootPath, fileContext, true);
 
-        final boolean deleted = Files.deleteIfExists(locatedPath);
+        final ReadableByteChannel sourceChannel = fileContext.sourceChannel();
+        logger.debug("sourceChannel: {}", sourceChannel);
+        if (sourceChannel == null) {
+            throw new FileBackException("no sourceChannel supplied");
+        }
+
+        final long bytesCopied = Files.copy(
+            Channels.newInputStream(sourceChannel), localPath,
+            StandardCopyOption.REPLACE_EXISTING);
+        logger.debug("bytesCopied: {}", bytesCopied);
+        fileContext.acceptBytesCopied(() -> bytesCopied);
+    }
+
+
+    @Override
+    public void delete(final FileContext fileContext)
+        throws IOException, FileBackException {
+
+        if (fileContext == null) {
+            throw new NullPointerException("null fileContext");
+        }
+
+        final Path localPath = localPath(rootPath, fileContext, false);
+
+        final boolean deleted = Files.deleteIfExists(localPath);
         logger.debug("deleted: {}", deleted);
     }
 

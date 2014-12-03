@@ -33,86 +33,28 @@ public final class FileBackConstants {
         = "http://www.github.com/jinahya/simple-file-back";
 
 
-    public static final String PROPERTY_KEY_BYTES
-        = PROPERTY_PREFIX + "/key_bytes";
+    public static final String PROPERTY_KEY_BYTES_SUPPLIER
+        = PROPERTY_PREFIX + "/key_bytes_supplier";
 
 
-    public static final String PROPERTY_SOURCE_STREAM
-        = PROPERTY_PREFIX + "/source_stream";
+    public static final String PROPERTY_SOURCE_CHANNEL_SUPPLIER
+        = PROPERTY_PREFIX + "/source_channel_supplier";
 
 
-    /**
-     * The value mapped to this property name must be an instance of
-     * {@code Supplier<InputStream>}
-     */
-    public static final String PROPERTY_SOURCE_STREAM_SUPPLIER
-        = PROPERTY_PREFIX + "/source_stream_supplier";
+    public static final String PROPERTY_TARGET_CHANNEL_SUPPLIER
+        = PROPERTY_PREFIX + "/target_channel_supplier";
 
 
-    public static final String PROPERTY_SOURCE_CHANNEL
-        = PROPERTY_PREFIX + "/source_channel";
+    public static final String PROPERTY_PATH_NAME_CONSUMER
+        = PROPERTY_PREFIX + "/path_name_consumer";
 
 
-    public static final String PROPERTY_TARGET_STREAM
-        = PROPERTY_PREFIX + "/target_stream";
+    public static final String PROPERTY_LOCAL_PATH_CONSUMER
+        = PROPERTY_PREFIX + "/local_path_consumer";
 
 
-    /**
-     * The value mapped to this property name must be an instance of
-     * {@code Supplier<OutputStream>}.
-     */
-    public static final String PROPERTY_TARGET_STREAM_SUPPLIER
-        = PROPERTY_PREFIX + "/target_stream_supplier";
-
-
-    public static final String PROPERTY_TARGET_CHANNEL
-        = PROPERTY_PREFIX + "/target_channel";
-
-
-    public static final String PROPERTY_PATH_NAME
-        = PROPERTY_PREFIX + "/path_name";
-
-
-    @Deprecated
-    public static final String PROPERTY_PATH_EXIST
-        = PROPERTY_PREFIX + "/path_exist";
-
-
-    public static final String PROPERTY_LOCATED_PATH
-        = PROPERTY_PREFIX + "/located_path";
-
-
-    public static final String PROPERTY_LOCATED_PATH_EXIST
-        = PROPERTY_PREFIX + "/located_path_exist";
-
-
-    public static final String PROPERTY_LOCATED_PATH_LENGTH
-        = PROPERTY_PREFIX + "/located_path_length";
-
-
-    @Deprecated
-    public static final String PROPERTY_FILE_EXIST
-        = PROPERTY_PREFIX + "/file_exist";
-
-
-    public static final String PROPERTY_LOCATED_FILE
-        = PROPERTY_PREFIX + "/located_file";
-
-
-    public static final String PROPERTY_LOCATED_FILE_EXIST
-        = PROPERTY_PREFIX + "/located_file_exist";
-
-
-    public static final String PROPERTY_LOCATED_FILE_LENGTH
-        = PROPERTY_PREFIX + "/located_file_length";
-
-
-    /**
-     * A property name for number of bytes copied from/to the source/target
-     * stream/channel.
-     */
-    public static final String PROPERTY_BYTES_COPIED
-        = PROPERTY_PREFIX + "/bytes_copied";
+    public static final String PROPERTY_BYTES_COPIED_CONSUMER
+        = PROPERTY_PREFIX + "/bytes_copied_consumer";
 
 
     /**

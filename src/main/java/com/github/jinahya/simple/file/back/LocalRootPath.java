@@ -17,9 +17,9 @@ package com.github.jinahya.simple.file.back;
 
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.*;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
@@ -29,8 +29,8 @@ import javax.inject.Qualifier;
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
 @Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+@Retention(RUNTIME)
+@Target({FIELD, PARAMETER, METHOD})
 @Qualifier
 public @interface LocalRootPath {
 
