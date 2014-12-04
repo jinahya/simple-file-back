@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import static java.lang.invoke.MethodHandles.lookup;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -83,9 +84,19 @@ public class LocalFileBackTest {
     }
 
 
-    private static LocalFileBack rootPathInjected() {
+    @Test(enabled = true, invocationCount = 128)
+    public static void localPath() throws IOException, FileBackException {
 
-        return new LocalRootPathModule().inject(LocalFileBack.class);
+        final Path rootPath = FileBackTests.randomRootPath();
+
+        final FileContext fileContext = new DefaultFileContext();
+
+        fileContext.keyBuffer(FileBackTests.randomKeyBuffer());
+
+        final Path localPath
+            = LocalFileBack.localPath(rootPath, fileContext, true);
+        //logger.debug("localPath: {}", localPath);
+        assertTrue(Files.isDirectory(localPath.getParent()));
     }
 
 
@@ -100,38 +111,23 @@ public class LocalFileBackTest {
     }
 
 
-    @Test(enabled = false, invocationCount = 128)
-    public static void localPath() throws IOException, FileBackException {
+    private static LocalFileBack rootPathInjected() {
 
-        final Path rootPath = Files.createTempDirectory("tmp");
-        //logger.debug("rootPath: {}", rootPath);
-        rootPath.toFile().deleteOnExit();
-
-        final FileContext fileContext = new DefaultFileContext();
-
-        final byte[] keyBytes = new byte[current().nextInt(1, 128)];
-        current().nextBytes(keyBytes);
-        //logger.debug("keyBytes: {}", Arrays.toString(keyBytes));
-        fileContext.keyBytes(keyBytes);
-
-        final Path localPath
-            = LocalFileBack.localPath(rootPath, fileContext, true);
-        //logger.debug("localPath: {}", localPath);
-        assertTrue(Files.isDirectory(localPath.getParent()));
+        return current().nextBoolean()
+               ? new LocalRootPathModule().inject(LocalFileBack.class)
+               : rootPathInjected(new LocalFileBack());
     }
 
 
-    @Test(enabled = true)
+    @Test(enabled = true, invocationCount = 128)
     public void read() throws IOException, FileBackException {
 
         final FileBack fileBack = rootPathInjected();
         final Path rootPath = rootPath((LocalFileBack) fileBack);
-        rootPath.toFile().deleteOnExit();
 
         final FileContext fileContext = new DefaultFileContext();
 
-        final byte[] keyBytes = FileBackTests.randomKeyBytes();
-        fileContext.keyBytes(keyBytes);
+        fileContext.keyBuffer(FileBackTests.randomKeyBuffer());
 
         final Path localPath
             = LocalFileBack.localPath(rootPath, fileContext, true);
@@ -154,17 +150,16 @@ public class LocalFileBackTest {
     }
 
 
-    @Test
+    @Test(enabled = true, invocationCount = 128)
     public void update() throws IOException, FileBackException {
 
         final LocalFileBack fileBack = rootPathInjected();
         final Path rootPath = rootPath(fileBack);
-        rootPath.toFile().deleteOnExit();
 
         final FileContext fileContext = new DefaultFileContext();
 
-        final byte[] keyBytes = FileBackTests.randomKeyBytes();
-        fileContext.keyBytesSupplier(() -> keyBytes);
+        final ByteBuffer keyBytes = FileBackTests.randomKeyBuffer();
+        fileContext.keyBuffer(keyBytes);
 
         fileContext.localPathConsumer((localPath) -> {
             logger.debug("localPath: {}", localPath);
@@ -193,6 +188,7 @@ public class LocalFileBackTest {
             }
         );
 
+        //keyBytes.flip();
         fileBack.update(fileContext);
 
         final byte[] actual = Files.readAllBytes(localPath);

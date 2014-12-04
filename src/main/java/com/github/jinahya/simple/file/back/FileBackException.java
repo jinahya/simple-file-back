@@ -23,6 +23,9 @@ package com.github.jinahya.simple.file.back;
 public class FileBackException extends Exception {
 
 
+    private static final long serialVersionUID = -4261800671834358794L;
+
+
     public FileBackException() {
 
         super();

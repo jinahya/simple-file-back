@@ -18,15 +18,20 @@ package com.github.jinahya.simple.file.back;
 
 import java.io.IOException;
 import static java.lang.invoke.MethodHandles.lookup;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.util.Formatter;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -47,7 +52,7 @@ public class LocalFileBack implements FileBack {
 
 
     public static final Function<byte[], String> IDENTIFIER_FUNCTION
-        = FileBackConstants.IDENTIFIER_HEX;
+        = FileBackConstants.IDENTIFIER_ENCODER_HEX;
 
 
     /**
@@ -62,20 +67,35 @@ public class LocalFileBack implements FileBack {
 
         final Logger logger = getLogger(lookup().lookupClass());
 
-        final byte[] keyBytes = fileContext.keyBytes();
-        logger.debug("keyBytes: {}", Arrays.toString(keyBytes));
-        if (keyBytes == null) {
-            throw new FileBackException("no keyBytes supplied");
+
+        final byte[] digestedBytes;
+        {
+            ByteBuffer keyBytes = fileContext.keyBuffer();
+            logger.debug("keyBytes: {}", keyBytes);
+            if (keyBytes == null) {
+                throw new FileBackException("no keyBytes supplied");
+            }
+            try {
+                final MessageDigest digest
+                    = MessageDigest.getInstance(DIGEST_ALGORITHM);
+                digest.update(keyBytes.asReadOnlyBuffer());
+                digestedBytes = digest.digest();
+            } catch (final NoSuchAlgorithmException nsae) {
+                throw new RuntimeException(nsae);
+            }
         }
 
-        final String joined;
-        try {
-            joined = FileBackUtilities.join(
-                keyBytes, DIGEST_ALGORITHM, IDENTIFIER_FUNCTION,
-                TOKEN_LENGTH, "/");
-        } catch (final NoSuchAlgorithmException nsae) {
-            throw new RuntimeException(nsae);
-        }
+        final String hexadecimalized
+            = IntStream.range(0, digestedBytes.length)
+            .collect(() -> new StringBuilder(digestedBytes.length * 2),
+                     (b, i) -> new Formatter(b).format(
+                         "%02x", digestedBytes[i] & 0xFF),
+                     StringBuilder::append).toString();
+        logger.debug("hexadecimalized: {}", hexadecimalized);
+
+        final String joined = Stream.of(
+            hexadecimalized.split("(?<=\\G.{" + TOKEN_LENGTH + "})"))
+            .collect(Collectors.joining("/"));
         final String pathName = "/" + joined;
         logger.debug("pathName: {}", pathName);
         fileContext.acceptPathName(() -> pathName);
@@ -122,17 +142,15 @@ public class LocalFileBack implements FileBack {
         }
 
         final Path localPath = localPath(rootPath, fileContext, false);
-
         if (!Files.isReadable(localPath)) {
             logger.warn("localPath is not readable: {}", localPath);
             return;
         }
 
-        final WritableByteChannel targetChannel
-            = fileContext.targetChannel();
-        logger.debug("targetStream: {}", targetChannel);
+        final WritableByteChannel targetChannel = fileContext.targetChannel();
+        logger.debug("targetChannel: {}", targetChannel);
         if (targetChannel == null) {
-            throw new FileBackException("no targetStream");
+            throw new FileBackException("no targetChannel supplied");
         }
 
         final long bytesCopied = Files.copy(

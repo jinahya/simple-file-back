@@ -16,10 +16,16 @@
 package com.github.jinahya.simple.file.back;
 
 
+import com.google.common.io.Files;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
+import java.nio.file.Path;
 import static java.util.concurrent.ThreadLocalRandom.current;
 
 
@@ -30,19 +36,21 @@ import static java.util.concurrent.ThreadLocalRandom.current;
 public final class FileBackTests {
 
 
-    public static byte[] randomKeyBytes() {
+    public static Path randomRootPath() {
 
-        final byte[] keyBytes = new byte[current().nextInt(1, 128)];
+        final File tempDir = Files.createTempDir();
+        tempDir.deleteOnExit();
 
-        current().nextBytes(keyBytes);
-
-        return keyBytes;
+        return tempDir.toPath();
     }
 
 
-    public static InputStream randomSourceStream(final byte[] sourceBytes) {
+    public static ByteBuffer randomKeyBuffer() {
 
-        return new ByteArrayInputStream(sourceBytes);
+        final byte[] keyBytes = new byte[current().nextInt(1, 128)];
+        current().nextBytes(keyBytes);
+
+        return ByteBuffer.wrap(keyBytes);
     }
 
 
@@ -51,7 +59,7 @@ public final class FileBackTests {
         final byte[] sourceByts = new byte[current().nextInt(0, 1024)];
         current().nextBytes(sourceByts);
 
-        return randomSourceStream(sourceByts);
+        return new ByteArrayInputStream(sourceByts);
     }
 
 
@@ -61,6 +69,10 @@ public final class FileBackTests {
     }
 
 
+    public static WritableByteChannel randomTargetChannel() {
+
+        return Channels.newChannel(randomTargetStream());
+    }
 
 
     private FileBackTests() {

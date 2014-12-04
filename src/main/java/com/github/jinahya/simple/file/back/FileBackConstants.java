@@ -33,8 +33,8 @@ public final class FileBackConstants {
         = "http://www.github.com/jinahya/simple-file-back";
 
 
-    public static final String PROPERTY_KEY_BYTES_SUPPLIER
-        = PROPERTY_PREFIX + "/key_bytes_supplier";
+    public static final String PROPERTY_KEY_BUFFER_SUPPLIER
+        = PROPERTY_PREFIX + "/key_buffer_supplier";
 
 
     public static final String PROPERTY_SOURCE_CHANNEL_SUPPLIER
@@ -61,18 +61,24 @@ public final class FileBackConstants {
      * An identifier function converting digested bytes to a base64url string.
      */
     @Deprecated
-    public static final Function<byte[], String> IDENTIFIER_BASE64URL
+    public static final Function<byte[], String> IDENTIFIER_ENCODER_BASE64URL
         = d -> Base64.getUrlEncoder().withoutPadding().encodeToString(d);
 
 
     /**
-     * An identifier function converting digested bytes to a hex string.
+     * An identifier function converting digested bytes into a hex string.
      */
-    public static final Function<byte[], String> IDENTIFIER_HEX
+    public static final Function<byte[], String> IDENTIFIER_ENCODER_HEX
         = d -> IntStream.range(0, d.length * 2)
         .map(i -> (d[i / 2] >> ((i & 1) == 0 ? 4 : 0)) & 0x0F)
         .mapToObj(Integer::toHexString)
         .collect(joining());
+
+
+//    public static final Function<String, byte[]> IDENTIFIER_DECODER_HEX
+//        = s -> IntStream.range(0, s.length() / 2)
+//        .map(i -> Byte.parseByte(s.substring(i * 2, i * 2 + 2), 0x10))
+//        .collect(joining());
 
 
     private FileBackConstants() {

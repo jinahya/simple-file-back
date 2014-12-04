@@ -16,6 +16,7 @@
 package com.github.jinahya.simple.file.back;
 
 
+import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
@@ -57,34 +58,37 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
-    default Supplier<byte[]> keyBytesSupplier() {
+    default Supplier<ByteBuffer> keyBufferSupplier() {
 
-        return (Supplier<byte[]>) getProperty(
-            FileBackConstants.PROPERTY_KEY_BYTES_SUPPLIER)
+        return (Supplier<ByteBuffer>) getProperty(
+            FileBackConstants.PROPERTY_KEY_BUFFER_SUPPLIER)
             .orElse(null);
     }
 
 
-    default byte[] keyBytes() {
+    default ByteBuffer keyBuffer() {
 
-        return Optional.ofNullable(keyBytesSupplier()).orElse(() -> null).get();
+        return Optional.ofNullable(FileContext.this.keyBufferSupplier())
+            .orElse(() -> null)
+            .get();
     }
 
 
     @SuppressWarnings("unchecked")
-    default Supplier<byte[]> keyBytesSupplier(
-        final Supplier<byte[]> keyBytesSupplier) {
+    default Supplier<ByteBuffer> keyBufferSupplier(
+        final Supplier<ByteBuffer> keyBytesSupplier) {
 
-        return (Supplier<byte[]>) putProperty(
-            FileBackConstants.PROPERTY_KEY_BYTES_SUPPLIER, keyBytesSupplier)
+        return (Supplier<ByteBuffer>) putProperty(
+            FileBackConstants.PROPERTY_KEY_BUFFER_SUPPLIER, keyBytesSupplier)
             .orElse(null);
     }
 
 
-    default byte[] keyBytes(final byte[] keyBytes) {
+    default ByteBuffer keyBuffer(final ByteBuffer keyBuffer) {
 
-        return Optional.ofNullable(keyBytesSupplier(() -> keyBytes))
-            .orElse(() -> null).get();
+        return Optional.ofNullable(keyBufferSupplier(() -> keyBuffer))
+            .orElse(() -> null)
+            .get();
     }
 
 
