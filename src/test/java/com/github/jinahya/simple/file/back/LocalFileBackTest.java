@@ -189,7 +189,7 @@ public class LocalFileBackTest {
         );
 
         //keyBytes.flip();
-        fileBack.update(fileContext);
+        fileBack.write(fileContext);
 
         final byte[] actual = Files.readAllBytes(localPath);
         //logger.debug("actual: {}", Arrays.toString(actual));

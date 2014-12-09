@@ -29,7 +29,7 @@ public class DefaultFileContext implements FileContext {
 
 
     @Override
-    public Optional<Object> getProperty(final String name) {
+    public Optional<Object> property(final String name) {
 
         if (name == null) {
             throw new NullPointerException("null name");
@@ -40,7 +40,7 @@ public class DefaultFileContext implements FileContext {
 
 
     @Override
-    public Optional<Object> putProperty(final String name, final Object value) {
+    public Optional<Object> property(final String name, final Object value) {
 
         if (name == null) {
             throw new NullPointerException("null name");

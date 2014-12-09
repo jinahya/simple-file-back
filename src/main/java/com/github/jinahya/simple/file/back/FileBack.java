@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package com.github.jinahya.simple.file.back;
 
 
@@ -25,13 +27,14 @@ import java.io.IOException;
 public interface FileBack {
 
 
+    @Deprecated
     void create(FileContext context) throws IOException, FileBackException;
 
 
     void read(FileContext context) throws IOException, FileBackException;
 
 
-    void update(FileContext context) throws IOException, FileBackException;
+    void write(FileContext context) throws IOException, FileBackException;
 
 
     void delete(FileContext context) throws IOException, FileBackException;

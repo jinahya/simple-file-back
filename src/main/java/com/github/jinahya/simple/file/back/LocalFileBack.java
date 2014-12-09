@@ -28,7 +28,6 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -51,8 +50,8 @@ public class LocalFileBack implements FileBack {
     public static final String DIGEST_ALGORITHM = "SHA-1"; // 160 bits
 
 
-    public static final Function<byte[], String> IDENTIFIER_FUNCTION
-        = FileBackConstants.IDENTIFIER_ENCODER_HEX;
+//    public static final Function<byte[], String> IDENTIFIER_FUNCTION
+//        = FileBackConstants.IDENTIFIER_ENCODER_HEX;
 
 
     /**
@@ -161,7 +160,7 @@ public class LocalFileBack implements FileBack {
 
 
     @Override
-    public void update(final FileContext fileContext)
+    public void write(final FileContext fileContext)
         throws IOException, FileBackException {
 
         if (fileContext == null) {
