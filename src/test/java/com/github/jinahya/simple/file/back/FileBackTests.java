@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package com.github.jinahya.simple.file.back;
 
 
@@ -24,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
 import static java.util.concurrent.ThreadLocalRandom.current;
@@ -36,6 +39,11 @@ import static java.util.concurrent.ThreadLocalRandom.current;
 public final class FileBackTests {
 
 
+    /**
+     * Generates a new random root path.
+     *
+     * @return a new random root path.
+     */
     public static Path randomRootPath() {
 
         final File tempDir = Files.createTempDir();
@@ -60,6 +68,12 @@ public final class FileBackTests {
         current().nextBytes(sourceByts);
 
         return new ByteArrayInputStream(sourceByts);
+    }
+
+
+    public static ReadableByteChannel randomSourceChannel() {
+
+        return Channels.newChannel(randomSourceStream());
     }
 
 

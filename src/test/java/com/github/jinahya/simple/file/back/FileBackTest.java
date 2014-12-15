@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package com.github.jinahya.simple.file.back;
 
 
@@ -38,7 +40,7 @@ public class FileBackTest {
     private static final Logger logger = getLogger(lookup().lookupClass());
 
 
-    @Test(invocationCount = 1)
+    @Test(enabled = false, invocationCount = 1)
     public static void bytesToHex() {
 
         final byte[] bytes = new byte[current().nextInt(0, 128)];

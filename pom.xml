@@ -6,7 +6,7 @@
   <!-- The Basics -->
   <groupId>com.github.jinahya</groupId>
   <artifactId>simple-file-back</artifactId>
-  <version>0.2</version>
+  <version>0.3</version>
   <packaging>jar</packaging>
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -269,7 +269,7 @@
     <connection>scm:git:git@github.com:jinahya/simple-file-back.git</connection>
     <developerConnection>scm:git:git@github.com:jinahya/simple-file-back.git</developerConnection>
     <url>https://github.com/jinahya/simple-file-back</url>
-    <tag>0.2</tag>
+    <tag>0.3</tag>
   </scm>
   <prerequisites>
     <maven>3.1.1</maven>

@@ -29,7 +29,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
-public class LocalRootPathModule extends AbstractModule {
+public class RootPathModule extends AbstractModule {
 
 
     private static final Logger logger = getLogger(lookup().lookupClass());

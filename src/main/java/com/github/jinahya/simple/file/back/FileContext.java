@@ -19,6 +19,7 @@ package com.github.jinahya.simple.file.back;
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -46,7 +47,7 @@ public interface FileContext {
      *
      * @param name the name of the property
      *
-     * @return an optional of the value of property mapped to specified
+     * @return an optional of the property value mapped to specified
      * {@code name}.
      *
      * @see #property(java.lang.String, java.lang.Class)
@@ -90,13 +91,15 @@ public interface FileContext {
 
 
     /**
+     * Sets a property value.
      *
-     * @param <T>
-     * @param name
-     * @param value
-     * @param type
+     * @param <T> property value type parameter
+     * @param name property name
+     * @param value property value
+     * @param type property value type
      *
-     * @return
+     * @return an optional property value previously mapped to specified
+     * {@code name}.
      *
      * @see #property(java.lang.String, java.lang.Object)
      */
@@ -112,6 +115,13 @@ public interface FileContext {
     }
 
 
+    /**
+     * Returns the current property value mapped to
+     * {@link FileBackConstants#PROPERTY_KEY_BUFFER_SUPPLIER}.
+     *
+     * @return the previous value mapped to
+     * {@link FileBackConstants#PROPERTY_KEY_BUFFER_SUPPLIER}.
+     */
     @SuppressWarnings("unchecked")
     default Supplier<ByteBuffer> keyBufferSupplier() {
 
@@ -131,15 +141,36 @@ public interface FileContext {
     }
 
 
+    /**
+     *
+     * @param keyBytes
+     *
+     * @return
+     *
+     * @deprecated Use {@link #keyBufferSupplier(java.util.function.Supplier)}
+     */
+    @Deprecated
     default Supplier<ByteBuffer> keyBufferSupplier(final byte[] keyBytes) {
 
-        return keyBufferSupplier(() -> ByteBuffer.wrap(keyBytes));
+        return keyBufferSupplier(
+            keyBytes == null ? null : () -> ByteBuffer.wrap(keyBytes));
     }
 
 
+    /**
+     *
+     * @param keyString
+     *
+     * @return
+     *
+     * @deprecated Use {@link #keyBufferSupplier(java.util.function.Supplier) }
+     */
+    @Deprecated
     default Supplier<ByteBuffer> keyBufferSupplier(final String keyString) {
 
-        return keyBufferSupplier(keyString.getBytes(StandardCharsets.UTF_8));
+        return keyBufferSupplier(
+            keyString == null
+            ? null : keyString.getBytes(StandardCharsets.UTF_8));
     }
 
 
@@ -277,16 +308,63 @@ public interface FileContext {
     }
 
 
+    /**
+     *
+     * @param sourceChannel
+     *
+     * @return
+     *
+     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
+     * }
+     */
+    @Deprecated
+    default Supplier<ReadableByteChannel> sourceChannelSupplier(
+        final ReadableByteChannel sourceChannel) {
+
+        return sourceChannelSupplier(
+            sourceChannel == null ? null : () -> sourceChannel);
+    }
+
+
+    /**
+     *
+     * @param sourceStream
+     *
+     * @return
+     *
+     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
+     * }
+     */
+    @Deprecated
+    default Supplier<ReadableByteChannel> sourceChannelSupplier(
+        final InputStream sourceStream) {
+
+        return sourceChannelSupplier(
+            sourceStream == null ? null : Channels.newChannel(sourceStream));
+    }
+
+
+    /**
+     *
+     * @param servletRequest
+     *
+     * @return
+     *
+     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
+     * }
+     */
+    @Deprecated
     default Supplier<ReadableByteChannel> sourceChannelSupplier(
         final ServletRequest servletRequest) {
 
-        return sourceChannelSupplier(() -> {
-            try {
-                return Channels.newChannel(servletRequest.getInputStream());
-            } catch (final IOException ioe) {
-                throw new RuntimeException(ioe);
-            }
-        });
+        return sourceChannelSupplier(
+            servletRequest == null ? null : () -> {
+                try {
+                    return Channels.newChannel(servletRequest.getInputStream());
+                } catch (final IOException ioe) {
+                    throw new RuntimeException(ioe);
+                }
+            });
     }
 
 
@@ -310,10 +388,20 @@ public interface FileContext {
     }
 
 
+    /**
+     *
+     * @param servletResponse
+     *
+     * @return
+     *
+     * @deprecated Use {@link #targetChannelSupplier(java.util.function.Supplier)
+     * }
+     */
+    @Deprecated
     default Supplier<WritableByteChannel> targetChannelSupplier(
         final ServletResponse servletResponse) {
 
-        return targetChannelSupplier(() -> {
+        return targetChannelSupplier(servletResponse == null ? null : () -> {
             try {
                 return Channels.newChannel(servletResponse.getOutputStream());
             } catch (final IOException ioe) {
@@ -324,7 +412,8 @@ public interface FileContext {
 
 
     /**
-     * Returns a consumer for bytes copied.
+     * Returns the consumer mapped to
+     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER}.
      *
      * @return the property value mapped to
      * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER} or {@code null}
@@ -338,6 +427,15 @@ public interface FileContext {
     }
 
 
+    /**
+     * Sets a consumer for
+     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER}.
+     *
+     * @param bytesCopiedConsumer new value; {@code null} for deletion.
+     *
+     * @return the previous value mapped to
+     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER}.
+     */
     default LongConsumer bytesCopiedConsumer(
         final LongConsumer bytesCopiedConsumer) {
 
