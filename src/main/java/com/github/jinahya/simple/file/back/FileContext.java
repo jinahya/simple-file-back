@@ -18,18 +18,20 @@
 package com.github.jinahya.simple.file.back;
 
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 
 /**
@@ -46,10 +48,23 @@ public interface FileContext {
      *
      * @return an optional of the value of property mapped to specified
      * {@code name}.
+     *
+     * @see #property(java.lang.String, java.lang.Class)
      */
     Optional<Object> property(String name);
 
 
+    /**
+     * Returns an optional property value mapped to specified {@code name}.
+     *
+     * @param <T> value type parameter
+     * @param name property name.
+     * @param type property value type.
+     *
+     * @return an optional property value.
+     *
+     * @see #property(java.lang.String)
+     */
     default <T> Optional<T> property(final String name, final Class<T> type) {
 
         if (type == null) {
@@ -57,30 +72,6 @@ public interface FileContext {
         }
 
         return Optional.ofNullable(type.cast(property(name).orElse(null)));
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default <T> Optional<Supplier<T>> propertyOfSupplier(final String name,
-                                                         final Class<T> type) {
-
-        if (type == null) {
-            throw new NullPointerException("null type");
-        }
-
-        return Optional.ofNullable((Supplier<T>) property(name).orElse(null));
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default <T> Optional<Consumer<T>> propertyOfConsumer(final String name,
-                                                         final Class<T> type) {
-
-        if (type == null) {
-            throw new NullPointerException("null type");
-        }
-
-        return Optional.ofNullable((Consumer<T>) property(name).orElse(null));
     }
 
 
@@ -92,10 +83,23 @@ public interface FileContext {
      * @param value the new value of the property; {@code null} for removing.
      *
      * @return an optional of previous value.
+     *
+     * @see #property(java.lang.String, java.lang.Object, java.lang.Class)
      */
     Optional<Object> property(String name, Object value);
 
 
+    /**
+     *
+     * @param <T>
+     * @param name
+     * @param value
+     * @param type
+     *
+     * @return
+     *
+     * @see #property(java.lang.String, java.lang.Object)
+     */
     default <T> Optional<T> property(final String name, final T value,
                                      final Class<T> type) {
 
@@ -103,8 +107,8 @@ public interface FileContext {
             throw new NullPointerException("null type");
         }
 
-        return Optional.ofNullable(
-            type.cast(property(name, value).orElse(null)));
+        return Optional.ofNullable(type.cast(property(name, value)
+            .orElse(null)));
     }
 
 
@@ -114,14 +118,6 @@ public interface FileContext {
         return (Supplier<ByteBuffer>) property(
             FileBackConstants.PROPERTY_KEY_BUFFER_SUPPLIER)
             .orElse(null);
-    }
-
-
-    default ByteBuffer keyBuffer() {
-
-        return Optional.ofNullable(keyBufferSupplier())
-            .orElse(() -> null)
-            .get();
     }
 
 
@@ -135,12 +131,91 @@ public interface FileContext {
     }
 
 
-    default ByteBuffer keyBuffer(final ByteBuffer keyBuffer) {
+    default Supplier<ByteBuffer> keyBufferSupplier(final byte[] keyBytes) {
 
-        return Optional.ofNullable(
-            keyBufferSupplier(keyBuffer == null ? null : () -> keyBuffer))
-            .orElse(() -> null)
-            .get();
+        return keyBufferSupplier(() -> ByteBuffer.wrap(keyBytes));
+    }
+
+
+    default Supplier<ByteBuffer> keyBufferSupplier(final String keyString) {
+
+        return keyBufferSupplier(keyString.getBytes(StandardCharsets.UTF_8));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<String> contentTypeConsumer() {
+
+        return (Consumer<String>) property(
+            FileBackConstants.PROPERTY_CONTENT_TYPE_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<String> contentTypeConsumer(
+        final Consumer<String> contentTypeConsumer) {
+
+        return (Consumer<String>) property(
+            FileBackConstants.PROPERTY_CONTENT_TYPE_CONSUMER,
+            contentTypeConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> contentTypeSupplier() {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_CONTENT_TYPE_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> contentTypeSupplier(
+        final Supplier<String> contentTypeSupplier) {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_CONTENT_TYPE_SUPPLIER,
+            contentTypeSupplier)
+            .orElse(null);
+    }
+
+
+    default LongConsumer contentLengthConsumer() {
+
+        return (LongConsumer) property(
+            FileBackConstants.PROPERTY_CONTENT_LENGTH_CONSUMER)
+            .orElse(null);
+    }
+
+
+    default LongConsumer contentLengthConsumer(
+        final LongConsumer contentLengthConsumer) {
+
+        return (LongConsumer) property(
+            FileBackConstants.PROPERTY_CONTENT_LENGTH_CONSUMER,
+            contentLengthConsumer)
+            .orElse(null);
+    }
+
+
+    default LongSupplier contentLengthSupplier() {
+
+        return (LongSupplier) property(
+            FileBackConstants.PROPERTY_CONTENT_LENGTH_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    default LongSupplier contentLengthSupplier(
+        final LongSupplier contentLengthSupplier) {
+
+        return (LongSupplier) property(
+            FileBackConstants.PROPERTY_CONTENT_LENGTH_SUPPLIER,
+            contentLengthSupplier)
+            .orElse(null);
     }
 
 
@@ -150,15 +225,6 @@ public interface FileContext {
         return (Consumer<Path>) property(
             FileBackConstants.PROPERTY_LOCAL_PATH_CONSUMER)
             .orElse(null);
-    }
-
-
-    default void acceptLocalPath(final Supplier<Path> localPathSupplier) {
-
-        Optional.ofNullable(localPathConsumer())
-            .orElse(localPath -> {
-            })
-            .accept(localPathSupplier.get());
     }
 
 
@@ -181,21 +247,6 @@ public interface FileContext {
     }
 
 
-    default void acceptPathName(final Supplier<String> pathNameSupplier) {
-
-        Optional.ofNullable(pathNameConsumer())
-            .orElse(pathName -> {
-            })
-            .accept(pathNameSupplier.get());
-    }
-
-
-    default void acceptPathName(final String pathName) {
-
-        acceptPathName(() -> pathName);
-    }
-
-
     @SuppressWarnings("unchecked")
     default Consumer<String> pathNameConsumer(
         final Consumer<String> pathNameConsumer) {
@@ -215,14 +266,6 @@ public interface FileContext {
     }
 
 
-    default ReadableByteChannel sourceChannel() {
-
-        return Optional.ofNullable(sourceChannelSupplier())
-            .orElse(() -> null)
-            .get();
-    }
-
-
     @SuppressWarnings("unchecked")
     default Supplier<ReadableByteChannel> sourceChannelSupplier(
         final Supplier<ReadableByteChannel> sourceChannelSupplier) {
@@ -234,20 +277,16 @@ public interface FileContext {
     }
 
 
-    default ReadableByteChannel sourceChannel(
-        final ReadableByteChannel sourceChannel) {
+    default Supplier<ReadableByteChannel> sourceChannelSupplier(
+        final ServletRequest servletRequest) {
 
-        return Optional.ofNullable(sourceChannelSupplier(
-            sourceChannel == null ? null : () -> sourceChannel))
-            .orElse(() -> null)
-            .get();
-
-    }
-
-
-    default ReadableByteChannel sourceChannel(final InputStream sourceStream) {
-
-        return sourceChannel(Channels.newChannel(sourceStream));
+        return sourceChannelSupplier(() -> {
+            try {
+                return Channels.newChannel(servletRequest.getInputStream());
+            } catch (final IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
+        });
     }
 
 
@@ -257,14 +296,6 @@ public interface FileContext {
         return (Supplier<WritableByteChannel>) property(
             FileBackConstants.PROPERTY_TARGET_CHANNEL_SUPPLIER)
             .orElse(null);
-    }
-
-
-    default WritableByteChannel targetChannel() {
-
-        return Optional.ofNullable(targetChannelSupplier())
-            .orElse(() -> null)
-            .get();
     }
 
 
@@ -279,29 +310,21 @@ public interface FileContext {
     }
 
 
-    /**
-     *
-     * @param targetChannel
-     *
-     * @return previously mapped value possibly {@code null}
-     */
-    default WritableByteChannel targetChannel(
-        final WritableByteChannel targetChannel) {
+    default Supplier<WritableByteChannel> targetChannelSupplier(
+        final ServletResponse servletResponse) {
 
-        return Optional.ofNullable(targetChannelSupplier(
-            targetChannel == null ? null : () -> targetChannel))
-            .orElse(() -> null)
-            .get();
-    }
-
-
-    default WritableByteChannel targetChannel(final OutputStream targetStream) {
-
-        return targetChannel(Channels.newChannel(targetStream));
+        return targetChannelSupplier(() -> {
+            try {
+                return Channels.newChannel(servletResponse.getOutputStream());
+            } catch (final IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
+        });
     }
 
 
     /**
+     * Returns a consumer for bytes copied.
      *
      * @return the property value mapped to
      * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER} or {@code null}
@@ -315,22 +338,6 @@ public interface FileContext {
     }
 
 
-    default void acceptBytesCopied(final LongSupplier bytesCopiedSupplier) {
-
-        Optional.ofNullable(bytesCopiedConsumer())
-            .orElse(bytesCopied -> {
-            })
-            .accept(bytesCopiedSupplier.getAsLong());
-    }
-
-
-    default void acceptBytesCopied(final long bytesCopied) {
-
-        acceptBytesCopied(() -> bytesCopied);
-    }
-
-
-    @SuppressWarnings("unchecked")
     default LongConsumer bytesCopiedConsumer(
         final LongConsumer bytesCopiedConsumer) {
 

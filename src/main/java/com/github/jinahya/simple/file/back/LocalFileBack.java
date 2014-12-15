@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package com.github.jinahya.simple.file.back;
 
 
@@ -28,6 +30,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -52,8 +55,6 @@ public class LocalFileBack implements FileBack {
 
 //    public static final Function<byte[], String> IDENTIFIER_FUNCTION
 //        = FileBackConstants.IDENTIFIER_ENCODER_HEX;
-
-
     /**
      * The fixed token length for splitting identifiers.
      */
@@ -69,15 +70,16 @@ public class LocalFileBack implements FileBack {
 
         final byte[] digestedBytes;
         {
-            ByteBuffer keyBytes = fileContext.keyBuffer();
-            logger.debug("keyBytes: {}", keyBytes);
-            if (keyBytes == null) {
-                throw new FileBackException("no keyBytes supplied");
+            final ByteBuffer keyBuffer = Optional.ofNullable(
+                fileContext.keyBufferSupplier()).orElse(() -> null).get();
+            logger.debug("keyBuffer: {}", keyBuffer);
+            if (keyBuffer == null) {
+                throw new FileBackException("no keyBuffer supplied");
             }
             try {
                 final MessageDigest digest
                     = MessageDigest.getInstance(DIGEST_ALGORITHM);
-                digest.update(keyBytes.asReadOnlyBuffer());
+                digest.update(keyBuffer.asReadOnlyBuffer());
                 digestedBytes = digest.digest();
             } catch (final NoSuchAlgorithmException nsae) {
                 throw new RuntimeException(nsae);
@@ -97,12 +99,14 @@ public class LocalFileBack implements FileBack {
             .collect(Collectors.joining("/"));
         final String pathName = "/" + joined;
         logger.debug("pathName: {}", pathName);
-        fileContext.acceptPathName(() -> pathName);
+        Optional.ofNullable(fileContext.pathNameConsumer()).orElse(v -> {
+        }).accept(pathName);
 
         final Path localPath = rootPath.resolve(
             joined.replace("/", rootPath.getFileSystem().getSeparator()));
         logger.debug("localPath: {}", localPath);
-        fileContext.acceptLocalPath(() -> localPath);
+        Optional.ofNullable(fileContext.localPathConsumer()).orElse(v -> {
+        }).accept(localPath);
 
         if (createParent) {
             final Path parent = localPath.getParent();
@@ -142,11 +146,12 @@ public class LocalFileBack implements FileBack {
 
         final Path localPath = localPath(rootPath, fileContext, false);
         if (!Files.isReadable(localPath)) {
-            logger.warn("localPath is not readable: {}", localPath);
+            logger.error("localPath is not readable: {}", localPath);
             return;
         }
 
-        final WritableByteChannel targetChannel = fileContext.targetChannel();
+        final WritableByteChannel targetChannel = Optional.ofNullable(
+            fileContext.targetChannelSupplier()).orElse(() -> null).get();
         logger.debug("targetChannel: {}", targetChannel);
         if (targetChannel == null) {
             throw new FileBackException("no targetChannel supplied");
@@ -155,7 +160,8 @@ public class LocalFileBack implements FileBack {
         final long bytesCopied = Files.copy(
             localPath, Channels.newOutputStream(targetChannel));
         logger.debug("bytesCopied: {}", bytesCopied);
-        fileContext.acceptBytesCopied(() -> bytesCopied);
+        Optional.ofNullable(fileContext.bytesCopiedConsumer()).orElse(v -> {
+        }).accept(bytesCopied);
     }
 
 
@@ -169,7 +175,8 @@ public class LocalFileBack implements FileBack {
 
         final Path localPath = localPath(rootPath, fileContext, true);
 
-        final ReadableByteChannel sourceChannel = fileContext.sourceChannel();
+        final ReadableByteChannel sourceChannel = Optional.ofNullable(
+            fileContext.sourceChannelSupplier()).orElse(() -> null).get();
         logger.debug("sourceChannel: {}", sourceChannel);
         if (sourceChannel == null) {
             throw new FileBackException("no sourceChannel supplied");
@@ -179,7 +186,8 @@ public class LocalFileBack implements FileBack {
             Channels.newInputStream(sourceChannel), localPath,
             StandardCopyOption.REPLACE_EXISTING);
         logger.debug("bytesCopied: {}", bytesCopied);
-        fileContext.acceptBytesCopied(() -> bytesCopied);
+        Optional.ofNullable(fileContext.bytesCopiedConsumer()).orElse(v -> {
+        }).accept(bytesCopied);
     }
 
 
@@ -202,7 +210,7 @@ public class LocalFileBack implements FileBack {
 
 
     @Inject
-    @LocalRootPath
+    @RootPath
     private Path rootPath;
 
 
