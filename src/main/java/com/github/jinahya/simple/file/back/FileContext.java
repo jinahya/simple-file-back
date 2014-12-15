@@ -18,15 +18,20 @@
 package com.github.jinahya.simple.file.back;
 
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 
 /**
@@ -123,6 +128,18 @@ public interface FileContext {
         return (Supplier<ByteBuffer>) property(
             FileBackConstants.PROPERTY_KEY_BUFFER_SUPPLIER, keyBytesSupplier)
             .orElse(null);
+    }
+
+
+    default Supplier<ByteBuffer> keyBufferSupplier(final byte[] keyBytes) {
+
+        return keyBufferSupplier(() -> ByteBuffer.wrap(keyBytes));
+    }
+
+
+    default Supplier<ByteBuffer> keyBufferSupplier(final String keyString) {
+
+        return keyBufferSupplier(keyString.getBytes(StandardCharsets.UTF_8));
     }
 
 
@@ -260,6 +277,19 @@ public interface FileContext {
     }
 
 
+    default Supplier<ReadableByteChannel> sourceChannelSupplier(
+        final ServletRequest servletRequest) {
+
+        return sourceChannelSupplier(() -> {
+            try {
+                return Channels.newChannel(servletRequest.getInputStream());
+            } catch (final IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
+        });
+    }
+
+
     @SuppressWarnings("unchecked")
     default Supplier<WritableByteChannel> targetChannelSupplier() {
 
@@ -277,6 +307,19 @@ public interface FileContext {
             FileBackConstants.PROPERTY_TARGET_CHANNEL_SUPPLIER,
             targetChannelSupplier)
             .orElse(null);
+    }
+
+
+    default Supplier<WritableByteChannel> targetChannelSupplier(
+        final ServletResponse servletResponse) {
+
+        return targetChannelSupplier(() -> {
+            try {
+                return Channels.newChannel(servletResponse.getOutputStream());
+            } catch (final IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
+        });
     }
 
 
