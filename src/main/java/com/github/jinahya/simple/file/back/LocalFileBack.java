@@ -210,7 +210,7 @@ public class LocalFileBack implements FileBack {
 
 
     @Inject
-    @LocalRoot
+    @RootPath
     private Path rootPath;
 
 
