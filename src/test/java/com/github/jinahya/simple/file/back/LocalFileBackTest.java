@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package com.github.jinahya.simple.file.back;
 
 
@@ -91,7 +93,7 @@ public class LocalFileBackTest {
 
         final FileContext fileContext = new DefaultFileContext();
 
-        fileContext.keyBuffer(FileBackTests.randomKeyBuffer());
+        fileContext.keyBufferSupplier(() -> FileBackTests.randomKeyBuffer());
 
         final Path localPath
             = LocalFileBack.localPath(rootPath, fileContext, true);
@@ -127,7 +129,8 @@ public class LocalFileBackTest {
 
         final FileContext fileContext = new DefaultFileContext();
 
-        fileContext.keyBuffer(FileBackTests.randomKeyBuffer());
+        final ByteBuffer keyBuffer = FileBackTests.randomKeyBuffer();
+        fileContext.keyBufferSupplier(() -> keyBuffer);
 
         final Path localPath
             = LocalFileBack.localPath(rootPath, fileContext, true);
@@ -140,7 +143,8 @@ public class LocalFileBackTest {
 
         final ByteArrayOutputStream targetStream
             = new ByteArrayOutputStream(expected.length);
-        fileContext.targetChannel(Channels.newChannel(targetStream));
+        fileContext.targetChannelSupplier(
+            () -> Channels.newChannel(targetStream));
 
         fileBack.read(fileContext);
 
@@ -158,8 +162,8 @@ public class LocalFileBackTest {
 
         final FileContext fileContext = new DefaultFileContext();
 
-        final ByteBuffer keyBytes = FileBackTests.randomKeyBuffer();
-        fileContext.keyBuffer(keyBytes);
+        final ByteBuffer keyBuffer = FileBackTests.randomKeyBuffer();
+        fileContext.keyBufferSupplier(() -> keyBuffer);
 
         fileContext.localPathConsumer((localPath) -> {
             logger.debug("localPath: {}", localPath);
