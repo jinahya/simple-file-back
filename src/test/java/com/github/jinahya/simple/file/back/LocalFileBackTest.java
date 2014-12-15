@@ -43,10 +43,10 @@ import org.testng.annotations.Test;
 public class LocalFileBackTest {
 
 
-    private static final String ROOT_PATH_FIELD_NAME = "rootPath";
-
-
     private static final Logger logger = getLogger(lookup().lookupClass());
+
+
+    private static final String ROOT_PATH_FIELD_NAME = "rootPath";
 
 
     public static Path rootPath(final LocalFileBack fileBack) {
@@ -55,7 +55,6 @@ public class LocalFileBackTest {
             final Field field
                 = LocalFileBack.class.getDeclaredField(ROOT_PATH_FIELD_NAME);
             field.setAccessible(true);
-
             try {
                 return (Path) field.get(fileBack);
             } catch (final IllegalAccessException iae) {
@@ -74,7 +73,6 @@ public class LocalFileBackTest {
             final Field field
                 = LocalFileBack.class.getDeclaredField(ROOT_PATH_FIELD_NAME);
             field.setAccessible(true);
-
             try {
                 field.set(fileBack, rootPathValue);
             } catch (final IllegalAccessException iae) {
@@ -109,14 +107,14 @@ public class LocalFileBackTest {
             throw new NullPointerException("null fileBack");
         }
 
-        return new LocalRootPathModule().inject(fileBack);
+        return new RootPathModule().inject(fileBack);
     }
 
 
     private static LocalFileBack rootPathInjected() {
 
         return current().nextBoolean()
-               ? new LocalRootPathModule().inject(LocalFileBack.class)
+               ? new RootPathModule().inject(LocalFileBack.class)
                : rootPathInjected(new LocalFileBack());
     }
 
@@ -165,12 +163,12 @@ public class LocalFileBackTest {
         final ByteBuffer keyBuffer = FileBackTests.randomKeyBuffer();
         fileContext.keyBufferSupplier(() -> keyBuffer);
 
-        fileContext.localPathConsumer((localPath) -> {
+        fileContext.localPathConsumer(localPath -> {
             logger.debug("localPath: {}", localPath);
         });
 
         fileContext.pathNameConsumer(
-            (pathName) -> {
+            pathName -> {
                 logger.debug("pathName: {}", pathName);
             });
 
@@ -187,12 +185,11 @@ public class LocalFileBackTest {
             () -> Channels.newChannel(sourceStream));
 
         fileContext.bytesCopiedConsumer(
-            (bytesCopied) -> {
+            bytesCopied -> {
                 logger.debug("bytesCopied: {}", bytesCopied);
             }
         );
 
-        //keyBytes.flip();
         fileBack.write(fileContext);
 
         final byte[] actual = Files.readAllBytes(localPath);
