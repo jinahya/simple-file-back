@@ -141,6 +141,25 @@ public interface FileContext {
     }
 
 
+    @SuppressWarnings("unchecked")
+    default Supplier<String> fileSuffixSupplier() {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_FILE_SUFFIX_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> fileSuffixSupplier(
+        final Supplier<String> fileSuffixSupplier) {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_FILE_SUFFIX_SUPPLIER, fileSuffixSupplier)
+            .orElse(null);
+    }
+
+
     /**
      *
      * @param keyBytes

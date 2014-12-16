@@ -130,6 +130,10 @@ public class LocalFileBackTest {
         final ByteBuffer keyBuffer = FileBackTests.randomKeyBuffer();
         fileContext.keyBufferSupplier(() -> keyBuffer);
 
+        if (current().nextBoolean()) {
+            fileContext.fileSuffixSupplier(() -> "txt");
+        }
+
         final Path localPath
             = LocalFileBack.localPath(rootPath, fileContext, true);
         //logger.debug("localPath: {}", localPath);
@@ -171,6 +175,10 @@ public class LocalFileBackTest {
             pathName -> {
                 logger.debug("pathName: {}", pathName);
             });
+
+        if (current().nextBoolean()) {
+            fileContext.fileSuffixSupplier(() -> "png");
+        }
 
         final Path localPath
             = LocalFileBack.localPath(rootPath, fileContext, true);

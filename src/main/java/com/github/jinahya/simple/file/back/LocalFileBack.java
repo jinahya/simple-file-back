@@ -31,6 +31,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -97,7 +98,15 @@ public class LocalFileBack implements FileBack {
         final String joined = Stream.of(
             hexadecimalized.split("(?<=\\G.{" + TOKEN_LENGTH + "})"))
             .collect(Collectors.joining("/"));
-        final String pathName = "/" + joined;
+        String pathName = "/" + joined;
+        final Supplier<String> fileSuffixSupplier
+            = fileContext.fileSuffixSupplier();
+        if (fileSuffixSupplier != null) {
+            final String fileSuffix = fileSuffixSupplier.get();
+            if (fileSuffix != null) {
+                pathName += "." + fileSuffixSupplier.get();
+            }
+        }
         logger.debug("pathName: {}", pathName);
         Optional.ofNullable(fileContext.pathNameConsumer()).orElse(v -> {
         }).accept(pathName);

@@ -33,6 +33,10 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/key_buffer_supplier";
 
 
+    public static final String PROPERTY_FILE_SUFFIX_SUPPLIER
+        = PROPERTY_PREFIX + "/file_suffix_supplier";
+
+
     public static final String PROPERTY_CONTENT_TYPE_CONSUMER
         = PROPERTY_PREFIX + "/content_type_consumer";
 
