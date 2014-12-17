@@ -46,10 +46,10 @@ public class LocalFileBackTest {
     private static final Logger logger = getLogger(lookup().lookupClass());
 
 
-    private static final String ROOT_PATH_FIELD_NAME = "rootPath";
+    private static final String ROOT_PATH_FIELD_NAME = "localRoot";
 
 
-    public static Path rootPath(final LocalFileBack fileBack) {
+    public static Path localRootValue(final LocalFileBack fileBack) {
 
         try {
             final Field field
@@ -66,15 +66,15 @@ public class LocalFileBackTest {
     }
 
 
-    public static void rootPath(final LocalFileBack fileBack,
-                                final Path rootPathValue) {
+    public static void localRootValue(final LocalFileBack fileBack,
+                                      final Path localRoot) {
 
         try {
             final Field field
                 = LocalFileBack.class.getDeclaredField(ROOT_PATH_FIELD_NAME);
             field.setAccessible(true);
             try {
-                field.set(fileBack, rootPathValue);
+                field.set(fileBack, localRoot);
             } catch (final IllegalAccessException iae) {
                 throw new RuntimeException(iae);
             }
@@ -85,7 +85,7 @@ public class LocalFileBackTest {
 
 
     @Test(enabled = true, invocationCount = 128)
-    public static void localPath() throws IOException, FileBackException {
+    public static void localLeaf() throws IOException, FileBackException {
 
         final Path rootPath = FileBackTests.randomRootPath();
 
@@ -93,10 +93,10 @@ public class LocalFileBackTest {
 
         fileContext.keyBufferSupplier(() -> FileBackTests.randomKeyBuffer());
 
-        final Path localPath
-            = LocalFileBack.localPath(rootPath, fileContext, true);
+        final Path localLeaf
+            = LocalFileBack.localLeaf(rootPath, fileContext, true);
         //logger.debug("localPath: {}", localPath);
-        assertTrue(Files.isDirectory(localPath.getParent()));
+        assertTrue(Files.isDirectory(localLeaf.getParent()));
     }
 
 
@@ -107,14 +107,14 @@ public class LocalFileBackTest {
             throw new NullPointerException("null fileBack");
         }
 
-        return new RootPathModule().inject(fileBack);
+        return new LocalRootModule().inject(fileBack);
     }
 
 
     private static LocalFileBack rootPathInjected() {
 
         return current().nextBoolean()
-               ? new RootPathModule().inject(LocalFileBack.class)
+               ? new LocalRootModule().inject(LocalFileBack.class)
                : rootPathInjected(new LocalFileBack());
     }
 
@@ -123,7 +123,7 @@ public class LocalFileBackTest {
     public void read() throws IOException, FileBackException {
 
         final FileBack fileBack = rootPathInjected();
-        final Path rootPath = rootPath((LocalFileBack) fileBack);
+        final Path rootPath = LocalFileBackTest.localRootValue((LocalFileBack) fileBack);
 
         final FileContext fileContext = new DefaultFileContext();
 
@@ -135,7 +135,7 @@ public class LocalFileBackTest {
         }
 
         final Path localPath
-            = LocalFileBack.localPath(rootPath, fileContext, true);
+            = LocalFileBack.localLeaf(rootPath, fileContext, true);
         //logger.debug("localPath: {}", localPath);
         final byte[] expected = new byte[current().nextInt(0, 1024)];
         current().nextBytes(expected);
@@ -160,7 +160,7 @@ public class LocalFileBackTest {
     public void update() throws IOException, FileBackException {
 
         final LocalFileBack fileBack = rootPathInjected();
-        final Path rootPath = rootPath(fileBack);
+        final Path rootPath = LocalFileBackTest.localRootValue(fileBack);
 
         final FileContext fileContext = new DefaultFileContext();
 
@@ -181,7 +181,7 @@ public class LocalFileBackTest {
         }
 
         final Path localPath
-            = LocalFileBack.localPath(rootPath, fileContext, true);
+            = LocalFileBack.localLeaf(rootPath, fileContext, true);
         logger.debug("localPath: {}", localPath);
 
         final byte[] expected = new byte[current().nextInt(0, 1024)];

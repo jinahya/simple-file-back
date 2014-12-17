@@ -29,6 +29,10 @@ public final class FileBackConstants {
         = "http://www.github.com/jinahya/simple-file-back";
 
 
+    public static final String PROPERTY_FILE_BACK_SUPPLIER
+        = PROPERTY_PREFIX + "/file_back_supplier";
+
+
     public static final String PROPERTY_KEY_BUFFER_SUPPLIER
         = PROPERTY_PREFIX + "/key_buffer_supplier";
 
@@ -65,12 +69,16 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/path_name_consumer";
 
 
-    public static final String PROPERTY_LOCAL_PATH_SUPPLIER
-        = PROPERTY_PREFIX + "/local_path_supplier";
+    public static final String PROPERTY_LOCAL_ROOT_CONSUMER
+        = PROPERTY_PREFIX + "/local_root_supplier";
 
 
-    public static final String PROPERTY_LOCAL_PATH_CONSUMER
-        = PROPERTY_PREFIX + "/local_path_consumer";
+    public static final String PROPERTY_LOCAL_LEAF_SUPPLIER
+        = PROPERTY_PREFIX + "/local_lef_supplier";
+
+
+    public static final String PROPERTY_LOCAL_LEAF_CONSUMER
+        = PROPERTY_PREFIX + "/local_leaf_consumer";
 
 
     public static final String PROPERTY_BYTES_COPIED_CONSUMER

@@ -115,6 +115,25 @@ public interface FileContext {
     }
 
 
+    @SuppressWarnings("unchecked")
+    default Supplier<FileBack> fileBackSupplier() {
+
+        return (Supplier<FileBack>) property(
+            FileBackConstants.PROPERTY_FILE_BACK_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<FileBack> fileBackSupplier(
+        final Supplier<FileBack> fileBackSupplier) {
+
+        return (Supplier<FileBack>) property(
+            FileBackConstants.PROPERTY_FILE_BACK_SUPPLIER, fileBackSupplier)
+            .orElse(null);
+    }
+
+
     /**
      * Returns the current property value mapped to
      * {@link FileBackConstants#PROPERTY_KEY_BUFFER_SUPPLIER}.
@@ -272,8 +291,7 @@ public interface FileContext {
     @SuppressWarnings("unchecked")
     default Consumer<Path> localPathConsumer() {
 
-        return (Consumer<Path>) property(
-            FileBackConstants.PROPERTY_LOCAL_PATH_CONSUMER)
+        return (Consumer<Path>) property(FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER)
             .orElse(null);
     }
 
@@ -282,8 +300,7 @@ public interface FileContext {
     default Consumer<Path> localPathConsumer(
         final Consumer<Path> localPathConsumer) {
 
-        return (Consumer<Path>) property(
-            FileBackConstants.PROPERTY_LOCAL_PATH_CONSUMER, localPathConsumer)
+        return (Consumer<Path>) property(FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER, localPathConsumer)
             .orElse(null);
     }
 

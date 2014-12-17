@@ -62,7 +62,7 @@ public class LocalFileBack implements FileBack {
     public static final int TOKEN_LENGTH = 3;
 
 
-    static Path localPath(final Path rootPath, final FileContext fileContext,
+    static Path localLeaf(final Path localRoot, final FileContext fileContext,
                           final boolean createParent)
         throws IOException, FileBackException {
 
@@ -111,21 +111,21 @@ public class LocalFileBack implements FileBack {
         Optional.ofNullable(fileContext.pathNameConsumer()).orElse(v -> {
         }).accept(pathName);
 
-        final Path localPath = rootPath.resolve(
-            joined.replace("/", rootPath.getFileSystem().getSeparator()));
-        logger.debug("localPath: {}", localPath);
+        final Path localLeaf = localRoot.resolve(
+            joined.replace("/", localRoot.getFileSystem().getSeparator()));
+        logger.debug("localLeaf: {}", localLeaf);
         Optional.ofNullable(fileContext.localPathConsumer()).orElse(v -> {
-        }).accept(localPath);
+        }).accept(localLeaf);
 
         if (createParent) {
-            final Path parent = localPath.getParent();
+            final Path parent = localLeaf.getParent();
             if (!Files.isDirectory(parent)) {
                 Files.createDirectories(parent);
                 logger.debug("parent created: {}", parent);
             }
         }
 
-        return localPath;
+        return localLeaf;
     }
 
 
@@ -153,9 +153,9 @@ public class LocalFileBack implements FileBack {
             throw new NullPointerException("null fileContext");
         }
 
-        final Path localPath = localPath(rootPath, fileContext, false);
-        if (!Files.isReadable(localPath)) {
-            logger.error("localPath is not readable: {}", localPath);
+        final Path localLeaf = localLeaf(localRoot, fileContext, false);
+        if (!Files.isReadable(localLeaf)) {
+            logger.error("localLeaf is not readable: {}", localLeaf);
             return;
         }
 
@@ -167,7 +167,7 @@ public class LocalFileBack implements FileBack {
         }
 
         final long bytesCopied = Files.copy(
-            localPath, Channels.newOutputStream(targetChannel));
+            localLeaf, Channels.newOutputStream(targetChannel));
         logger.debug("bytesCopied: {}", bytesCopied);
         Optional.ofNullable(fileContext.bytesCopiedConsumer()).orElse(v -> {
         }).accept(bytesCopied);
@@ -182,7 +182,7 @@ public class LocalFileBack implements FileBack {
             throw new NullPointerException("null fileContext");
         }
 
-        final Path localPath = localPath(rootPath, fileContext, true);
+        final Path localLeaf = localLeaf(localRoot, fileContext, true);
 
         final ReadableByteChannel sourceChannel = Optional.ofNullable(
             fileContext.sourceChannelSupplier()).orElse(() -> null).get();
@@ -192,7 +192,7 @@ public class LocalFileBack implements FileBack {
         }
 
         final long bytesCopied = Files.copy(
-            Channels.newInputStream(sourceChannel), localPath,
+            Channels.newInputStream(sourceChannel), localLeaf,
             StandardCopyOption.REPLACE_EXISTING);
         logger.debug("bytesCopied: {}", bytesCopied);
         Optional.ofNullable(fileContext.bytesCopiedConsumer()).orElse(v -> {
@@ -208,9 +208,10 @@ public class LocalFileBack implements FileBack {
             throw new NullPointerException("null fileContext");
         }
 
-        final Path localPath = localPath(rootPath, fileContext, false);
+        final Path localLeaf = localLeaf(localRoot, fileContext, false);
+        logger.debug("localLeaf: {}", localLeaf);
 
-        final boolean deleted = Files.deleteIfExists(localPath);
+        final boolean deleted = Files.deleteIfExists(localLeaf);
         logger.debug("deleted: {}", deleted);
     }
 
@@ -219,8 +220,8 @@ public class LocalFileBack implements FileBack {
 
 
     @Inject
-    @RootPath
-    private Path rootPath;
+    @LocalRoot
+    private Path localRoot;
 
 
 }
