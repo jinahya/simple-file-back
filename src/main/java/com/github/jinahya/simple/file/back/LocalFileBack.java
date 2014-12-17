@@ -114,7 +114,7 @@ public class LocalFileBack implements FileBack {
         final Path localLeaf = localRoot.resolve(
             joined.replace("/", localRoot.getFileSystem().getSeparator()));
         logger.debug("localLeaf: {}", localLeaf);
-        Optional.ofNullable(fileContext.localPathConsumer()).orElse(v -> {
+        Optional.ofNullable(fileContext.localLeafConsumer()).orElse(v -> {
         }).accept(localLeaf);
 
         if (createParent) {

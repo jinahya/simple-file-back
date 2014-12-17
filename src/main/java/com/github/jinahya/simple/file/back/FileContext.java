@@ -289,7 +289,7 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
-    default Consumer<Path> localPathConsumer() {
+    default Consumer<Path> localLeafConsumer() {
 
         return (Consumer<Path>) property(FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER)
             .orElse(null);
@@ -297,10 +297,10 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
-    default Consumer<Path> localPathConsumer(
-        final Consumer<Path> localPathConsumer) {
+    default Consumer<Path> localLeafConsumer(
+        final Consumer<Path> localLeafConsumer) {
 
-        return (Consumer<Path>) property(FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER, localPathConsumer)
+        return (Consumer<Path>) property(FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER, localLeafConsumer)
             .orElse(null);
     }
 

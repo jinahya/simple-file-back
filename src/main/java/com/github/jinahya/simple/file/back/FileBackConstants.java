@@ -74,7 +74,7 @@ public final class FileBackConstants {
 
 
     public static final String PROPERTY_LOCAL_LEAF_SUPPLIER
-        = PROPERTY_PREFIX + "/local_lef_supplier";
+        = PROPERTY_PREFIX + "/local_leaf_supplier";
 
 
     public static final String PROPERTY_LOCAL_LEAF_CONSUMER
