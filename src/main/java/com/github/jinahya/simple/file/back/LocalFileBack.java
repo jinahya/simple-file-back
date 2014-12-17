@@ -155,6 +155,9 @@ public class LocalFileBack implements FileBack {
 
         final Path localLeaf = localLeaf(localRoot, fileContext, false);
         if (!Files.isReadable(localLeaf)) {
+            Optional.ofNullable(fileContext.targetCopiedConsumer())
+                .orElse(v -> {
+                }).accept(-1L);
             logger.error("localLeaf is not readable: {}", localLeaf);
             return;
         }
@@ -166,11 +169,11 @@ public class LocalFileBack implements FileBack {
             throw new FileBackException("no targetChannel supplied");
         }
 
-        final long bytesCopied = Files.copy(
+        final long targetCopied = Files.copy(
             localLeaf, Channels.newOutputStream(targetChannel));
-        logger.debug("bytesCopied: {}", bytesCopied);
-        Optional.ofNullable(fileContext.bytesCopiedConsumer()).orElse(v -> {
-        }).accept(bytesCopied);
+        logger.debug("targetCopied: {}", targetCopied);
+        Optional.ofNullable(fileContext.targetCopiedConsumer()).orElse(v -> {
+        }).accept(targetCopied);
     }
 
 
@@ -191,12 +194,12 @@ public class LocalFileBack implements FileBack {
             throw new FileBackException("no sourceChannel supplied");
         }
 
-        final long bytesCopied = Files.copy(
+        final long sourceCopied = Files.copy(
             Channels.newInputStream(sourceChannel), localLeaf,
             StandardCopyOption.REPLACE_EXISTING);
-        logger.debug("bytesCopied: {}", bytesCopied);
-        Optional.ofNullable(fileContext.bytesCopiedConsumer()).orElse(v -> {
-        }).accept(bytesCopied);
+        logger.debug("sourceCopied: {}", sourceCopied);
+        Optional.ofNullable(fileContext.sourceCopiedConsumer()).orElse(v -> {
+        }).accept(sourceCopied);
     }
 
 

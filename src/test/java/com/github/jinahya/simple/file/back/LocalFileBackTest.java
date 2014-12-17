@@ -193,9 +193,9 @@ public class LocalFileBackTest {
         fileContext.sourceChannelSupplier(
             () -> Channels.newChannel(sourceStream));
 
-        fileContext.bytesCopiedConsumer(
-            bytesCopied -> {
-                logger.debug("bytesCopied: {}", bytesCopied);
+        fileContext.sourceCopiedConsumer(
+            sourceCopied -> {
+                logger.debug("bytesCopied: {}", sourceCopied);
             }
         );
 

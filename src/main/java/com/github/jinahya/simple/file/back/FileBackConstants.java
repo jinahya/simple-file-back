@@ -61,8 +61,16 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/source_channel_supplier";
 
 
+    public static final String PROPERTY_SOURCE_COPIED_CONSUMER
+        = PROPERTY_PREFIX + "/source_copied_consumer";
+
+
     public static final String PROPERTY_TARGET_CHANNEL_SUPPLIER
         = PROPERTY_PREFIX + "/target_channel_supplier";
+
+
+    public static final String PROPERTY_TARGET_COPIED_CONSUMER
+        = PROPERTY_PREFIX + "/target_copied_consumer";
 
 
     public static final String PROPERTY_PATH_NAME_CONSUMER
@@ -81,8 +89,9 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/local_leaf_consumer";
 
 
-    public static final String PROPERTY_BYTES_COPIED_CONSUMER
-        = PROPERTY_PREFIX + "/bytes_copied_consumer";
+//    @Deprecated
+//    public static final String PROPERTY_BYTES_COPIED_CONSUMER
+//        = PROPERTY_PREFIX + "/bytes_copied_consumer";
 
 
     private FileBackConstants() {

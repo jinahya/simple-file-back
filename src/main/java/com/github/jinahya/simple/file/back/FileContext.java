@@ -447,37 +447,38 @@ public interface FileContext {
     }
 
 
-    /**
-     * Returns the consumer mapped to
-     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER}.
-     *
-     * @return the property value mapped to
-     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER} or {@code null}
-     * if no mappings found
-     */
-    default LongConsumer bytesCopiedConsumer() {
+    default LongConsumer sourceCopiedConsumer() {
 
         return (LongConsumer) property(
-            FileBackConstants.PROPERTY_BYTES_COPIED_CONSUMER)
+            FileBackConstants.PROPERTY_SOURCE_COPIED_CONSUMER)
             .orElse(null);
     }
 
 
-    /**
-     * Sets a consumer for
-     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER}.
-     *
-     * @param bytesCopiedConsumer new value; {@code null} for deletion.
-     *
-     * @return the previous value mapped to
-     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER}.
-     */
-    default LongConsumer bytesCopiedConsumer(
-        final LongConsumer bytesCopiedConsumer) {
+    default LongConsumer sourceCopiedConsumer(
+        final LongConsumer sourceCopiedConsumer) {
 
         return (LongConsumer) property(
-            FileBackConstants.PROPERTY_BYTES_COPIED_CONSUMER,
-            bytesCopiedConsumer)
+            FileBackConstants.PROPERTY_SOURCE_COPIED_CONSUMER,
+            sourceCopiedConsumer)
+            .orElse(null);
+    }
+
+
+    default LongConsumer targetCopiedConsumer() {
+
+        return (LongConsumer) property(
+            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER)
+            .orElse(null);
+    }
+
+
+    default LongConsumer targetCopiedConsumer(
+        final LongConsumer targetCopiedConsumer) {
+
+        return (LongConsumer) property(
+            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER,
+            targetCopiedConsumer)
             .orElse(null);
     }
 
