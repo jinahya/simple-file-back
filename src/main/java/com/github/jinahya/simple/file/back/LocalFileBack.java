@@ -223,7 +223,7 @@ public class LocalFileBack implements FileBack {
 
 
     @Inject
-    @ConfiguredLocalRoot
+    @LocalRoot
     private Path localRoot;
 
 

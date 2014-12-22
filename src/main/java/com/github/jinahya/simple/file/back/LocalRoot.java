@@ -32,7 +32,7 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({FIELD, PARAMETER, METHOD})
 @Qualifier
-public @interface ConfiguredLocalRoot {
+public @interface LocalRoot {
 
 
 }
