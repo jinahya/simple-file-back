@@ -154,6 +154,7 @@ public class LocalFileBack implements FileBack {
         }
 
         final Path localLeaf = localLeaf(localRoot, fileContext, false);
+
         if (!Files.isReadable(localLeaf)) {
             Optional.ofNullable(fileContext.targetCopiedConsumer())
                 .orElse(v -> {
@@ -168,7 +169,6 @@ public class LocalFileBack implements FileBack {
         if (targetChannel == null) {
             throw new FileBackException("no targetChannel supplied");
         }
-
         final long targetCopied = Files.copy(
             localLeaf, Channels.newOutputStream(targetChannel));
         logger.debug("targetCopied: {}", targetCopied);
@@ -198,8 +198,9 @@ public class LocalFileBack implements FileBack {
             Channels.newInputStream(sourceChannel), localLeaf,
             StandardCopyOption.REPLACE_EXISTING);
         logger.debug("sourceCopied: {}", sourceCopied);
-        Optional.ofNullable(fileContext.sourceCopiedConsumer()).orElse(v -> {
-        }).accept(sourceCopied);
+        Optional.ofNullable(fileContext.sourceCopiedConsumer())
+            .orElse(v -> {
+            }).accept(sourceCopied);
     }
 
 
