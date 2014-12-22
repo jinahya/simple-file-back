@@ -29,7 +29,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
-public class LocalRootModule extends AbstractModule {
+public class ConfiguredLocalRootModule extends AbstractModule {
 
 
     private static final Logger logger = getLogger(lookup().lookupClass());
@@ -39,7 +39,7 @@ public class LocalRootModule extends AbstractModule {
     protected void configure() {
 
         bind(Path.class)
-            .annotatedWith(LocalRoot.class)
+            .annotatedWith(ConfiguredLocalRoot.class)
             .toInstance(FileBackTests.randomLocalRoot());
     }
 

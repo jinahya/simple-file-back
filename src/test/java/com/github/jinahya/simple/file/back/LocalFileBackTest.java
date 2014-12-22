@@ -107,14 +107,14 @@ public class LocalFileBackTest {
             throw new NullPointerException("null fileBack");
         }
 
-        return new LocalRootModule().inject(fileBack);
+        return new ConfiguredLocalRootModule().inject(fileBack);
     }
 
 
     private static LocalFileBack localRootInjected() {
 
         return current().nextBoolean()
-               ? new LocalRootModule().inject(LocalFileBack.class)
+               ? new ConfiguredLocalRootModule().inject(LocalFileBack.class)
                : localRootInjected(new LocalFileBack());
     }
 
