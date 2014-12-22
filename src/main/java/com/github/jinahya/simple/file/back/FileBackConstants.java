@@ -89,11 +89,6 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/local_leaf_consumer";
 
 
-//    @Deprecated
-//    public static final String PROPERTY_BYTES_COPIED_CONSUMER
-//        = PROPERTY_PREFIX + "/bytes_copied_consumer";
-
-
     private FileBackConstants() {
 
         super();

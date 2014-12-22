@@ -95,7 +95,6 @@ public class LocalFileBackTest {
 
         final Path localLeaf
             = LocalFileBack.localLeaf(localRoot, fileContext, true);
-        //logger.debug("localPath: {}", localPath);
         assertTrue(Files.isDirectory(localLeaf.getParent()));
     }
 
@@ -137,12 +136,10 @@ public class LocalFileBackTest {
 
         final Path localLeaf
             = LocalFileBack.localLeaf(localRoot, fileContext, true);
-        //logger.debug("localPath: {}", localPath);
         final byte[] expected = new byte[current().nextInt(0, 1024)];
         current().nextBytes(expected);
         Files.write(localLeaf, expected, StandardOpenOption.CREATE_NEW,
                     StandardOpenOption.WRITE);
-        //logger.debug("written: {}", Arrays.toString(expected));
 
         final ByteArrayOutputStream targetStream
             = new ByteArrayOutputStream(expected.length);
@@ -187,7 +184,6 @@ public class LocalFileBackTest {
 
         final byte[] expected = new byte[current().nextInt(0, 1024)];
         current().nextBytes(expected);
-        //logger.debug("expected: {}", Arrays.toString(expected));
         final ByteArrayInputStream sourceStream
             = new ByteArrayInputStream(expected);
         fileContext.sourceChannelSupplier(
@@ -195,14 +191,13 @@ public class LocalFileBackTest {
 
         fileContext.sourceCopiedConsumer(
             sourceCopied -> {
-                logger.debug("bytesCopied: {}", sourceCopied);
+                logger.debug("sourceCopied: {}", sourceCopied);
             }
         );
 
         fileBack.write(fileContext);
 
         final byte[] actual = Files.readAllBytes(localLeaf);
-        //logger.debug("actual: {}", Arrays.toString(actual));
         assertEquals(actual, expected);
     }
 
