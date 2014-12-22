@@ -54,8 +54,6 @@ public class LocalFileBack implements FileBack {
     public static final String DIGEST_ALGORITHM = "SHA-1"; // 160 bits
 
 
-//    public static final Function<byte[], String> IDENTIFIER_FUNCTION
-//        = FileBackConstants.IDENTIFIER_ENCODER_HEX;
     /**
      * The fixed token length for splitting identifiers.
      */
@@ -68,8 +66,7 @@ public class LocalFileBack implements FileBack {
 
         final Logger logger = getLogger(lookup().lookupClass());
 
-
-        final byte[] digestedBytes;
+        final byte[] digested;
         {
             final ByteBuffer keyBuffer = Optional.ofNullable(
                 fileContext.keyBufferSupplier()).orElse(() -> null).get();
@@ -81,17 +78,16 @@ public class LocalFileBack implements FileBack {
                 final MessageDigest digest
                     = MessageDigest.getInstance(DIGEST_ALGORITHM);
                 digest.update(keyBuffer.asReadOnlyBuffer());
-                digestedBytes = digest.digest();
+                digested = digest.digest();
             } catch (final NoSuchAlgorithmException nsae) {
                 throw new RuntimeException(nsae);
             }
         }
 
-        final String hexadecimalized
-            = IntStream.range(0, digestedBytes.length)
-            .collect(() -> new StringBuilder(digestedBytes.length * 2),
+        final String hexadecimalized = IntStream.range(0, digested.length)
+            .collect(() -> new StringBuilder(digested.length * 2),
                      (b, i) -> new Formatter(b).format(
-                         "%02x", digestedBytes[i] & 0xFF),
+                         "%02x", digested[i] & 0xFF),
                      StringBuilder::append).toString();
         logger.debug("hexadecimalized: {}", hexadecimalized);
 
@@ -126,14 +122,6 @@ public class LocalFileBack implements FileBack {
         }
 
         return localLeaf;
-    }
-
-
-    public LocalFileBack() {
-
-        super();
-
-        logger = getLogger(getClass());
     }
 
 
@@ -220,7 +208,7 @@ public class LocalFileBack implements FileBack {
     }
 
 
-    private final transient Logger logger;
+    private transient final Logger logger = getLogger(getClass());
 
 
     @Inject
