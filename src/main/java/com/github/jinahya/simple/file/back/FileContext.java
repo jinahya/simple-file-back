@@ -291,7 +291,8 @@ public interface FileContext {
     @SuppressWarnings("unchecked")
     default Consumer<Path> localLeafConsumer() {
 
-        return (Consumer<Path>) property(FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER)
+        return (Consumer<Path>) property(
+            FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER)
             .orElse(null);
     }
 
@@ -300,7 +301,8 @@ public interface FileContext {
     default Consumer<Path> localLeafConsumer(
         final Consumer<Path> localLeafConsumer) {
 
-        return (Consumer<Path>) property(FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER, localLeafConsumer)
+        return (Consumer<Path>) property(
+            FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER, localLeafConsumer)
             .orElse(null);
     }
 
@@ -320,6 +322,25 @@ public interface FileContext {
 
         return (Consumer<String>) property(
             FileBackConstants.PROPERTY_PATH_NAME_CONSUMER, pathNameConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> pathNameSupplier() {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_PATH_NAME_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> pathNameSupplier(
+        final Supplier<String> pathNameSupplier) {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_PATH_NAME_SUPPLIER, pathNameSupplier)
             .orElse(null);
     }
 

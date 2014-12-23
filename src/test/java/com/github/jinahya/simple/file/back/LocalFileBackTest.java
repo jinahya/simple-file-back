@@ -195,7 +195,7 @@ public class LocalFileBackTest {
             }
         );
 
-        fileBack.write(fileContext);
+        fileBack.update(fileContext);
 
         final byte[] actual = Files.readAllBytes(localLeaf);
         assertEquals(actual, expected);

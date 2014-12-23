@@ -27,14 +27,8 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Formatter;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -51,56 +45,26 @@ public class LocalFileBack implements FileBack {
         = FileBackConstants.PROPERTY_PREFIX + "/local_file_back";
 
 
-    public static final String DIGEST_ALGORITHM = "SHA-1"; // 160 bits
-
-
-    /**
-     * The fixed token length for splitting identifiers.
-     */
-    public static final int TOKEN_LENGTH = 3;
-
-
     static Path localLeaf(final Path localRoot, final FileContext fileContext,
                           final boolean createParent)
         throws IOException, FileBackException {
 
         final Logger logger = getLogger(lookup().lookupClass());
 
-        final byte[] digested;
-        {
-            final ByteBuffer keyBuffer = Optional.ofNullable(
-                fileContext.keyBufferSupplier()).orElse(() -> null).get();
-            logger.debug("keyBuffer: {}", keyBuffer);
-            if (keyBuffer == null) {
-                throw new FileBackException("no keyBuffer supplied");
-            }
-            try {
-                final MessageDigest digest
-                    = MessageDigest.getInstance(DIGEST_ALGORITHM);
-                digest.update(keyBuffer.asReadOnlyBuffer());
-                digested = digest.digest();
-            } catch (final NoSuchAlgorithmException nsae) {
-                throw new RuntimeException(nsae);
-            }
+        final ByteBuffer keyBuffer = Optional.ofNullable(
+            fileContext.keyBufferSupplier()).orElse(() -> null).get();
+        logger.debug("keyBuffer: {}", keyBuffer);
+        if (keyBuffer == null) {
+            throw new FileBackException("no keyBuffer supplied");
         }
 
-        final String hexadecimalized = IntStream.range(0, digested.length)
-            .collect(() -> new StringBuilder(digested.length * 2),
-                     (b, i) -> new Formatter(b).format(
-                         "%02x", digested[i] & 0xFF),
-                     StringBuilder::append).toString();
-        logger.debug("hexadecimalized: {}", hexadecimalized);
-
-        final String joined = Stream.of(
-            hexadecimalized.split("(?<=\\G.{" + TOKEN_LENGTH + "})"))
-            .collect(Collectors.joining("/"));
-        String pathName = "/" + joined;
+        String pathName = FileBackUtilities.keyBufferToPathName(keyBuffer);
         final Supplier<String> fileSuffixSupplier
             = fileContext.fileSuffixSupplier();
         if (fileSuffixSupplier != null) {
             final String fileSuffix = fileSuffixSupplier.get();
             if (fileSuffix != null) {
-                pathName += "." + fileSuffixSupplier.get();
+                pathName += "." + fileSuffix.trim();
             }
         }
         logger.debug("pathName: {}", pathName);
@@ -108,7 +72,7 @@ public class LocalFileBack implements FileBack {
         }).accept(pathName);
 
         final Path localLeaf = localRoot.resolve(
-            joined.replace("/", localRoot.getFileSystem().getSeparator()));
+            pathName.replace("/", localRoot.getFileSystem().getSeparator()));
         logger.debug("localLeaf: {}", localLeaf);
         Optional.ofNullable(fileContext.localLeafConsumer()).orElse(v -> {
         }).accept(localLeaf);
@@ -126,10 +90,45 @@ public class LocalFileBack implements FileBack {
 
 
     @Override
-    public void create(final FileContext fileContext)
+    public void locate(final FileContext fileContext)
         throws IOException, FileBackException {
 
-        throw new UnsupportedOperationException("not supported: create");
+        if (fileContext == null) {
+            throw new NullPointerException("null fileContext");
+        }
+
+        String pathName = Optional.ofNullable(fileContext.pathNameSupplier())
+            .orElse(() -> null).get();
+        logger.debug("pathName: {}", pathName);
+        if (pathName == null) {
+            throw new FileBackException("no pathName supplied");
+        }
+
+        final Path localLeaf = localRoot.resolve(pathName);
+        logger.debug("localLeaf: {}", localLeaf);
+        logger.debug("localLeaf.regularFile: {}", Files.isRegularFile(localLeaf));
+        logger.debug("localLeaf.readable: {}", Files.isReadable(localLeaf));
+        Optional.ofNullable(fileContext.localLeafConsumer()).orElse(v -> {
+        }).accept(localLeaf);
+
+        if (!Files.isRegularFile(localLeaf) || !Files.isReadable(localLeaf)) {
+            Optional.ofNullable(fileContext.targetCopiedConsumer())
+                .orElse(v -> {
+                }).accept(-1L);
+            return;
+        }
+
+        final WritableByteChannel targetChannel = Optional.ofNullable(
+            fileContext.targetChannelSupplier()).orElse(() -> null).get();
+        logger.debug("targetChannel: {}", targetChannel);
+        if (targetChannel == null) {
+            throw new FileBackException("no targetChannel supplied");
+        }
+        final long targetCopied = Files.copy(
+            localLeaf, Channels.newOutputStream(targetChannel));
+        logger.debug("targetCopied: {}", targetCopied);
+        Optional.ofNullable(fileContext.targetCopiedConsumer()).orElse(v -> {
+        }).accept(targetCopied);
     }
 
 
@@ -166,7 +165,7 @@ public class LocalFileBack implements FileBack {
 
 
     @Override
-    public void write(final FileContext fileContext)
+    public void update(final FileContext fileContext)
         throws IOException, FileBackException {
 
         if (fileContext == null) {
