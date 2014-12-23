@@ -18,7 +18,6 @@
 package com.github.jinahya.simple.file.back;
 
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -31,8 +30,6 @@ import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 
 
 /**
@@ -401,30 +398,6 @@ public interface FileContext {
     }
 
 
-    /**
-     *
-     * @param servletRequest
-     *
-     * @return
-     *
-     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
-     * }
-     */
-    @Deprecated
-    default Supplier<ReadableByteChannel> sourceChannelSupplier(
-        final ServletRequest servletRequest) {
-
-        return sourceChannelSupplier(
-            servletRequest == null ? null : () -> {
-                try {
-                    return Channels.newChannel(servletRequest.getInputStream());
-                } catch (final IOException ioe) {
-                    throw new RuntimeException(ioe);
-                }
-            });
-    }
-
-
     @SuppressWarnings("unchecked")
     default Supplier<WritableByteChannel> targetChannelSupplier() {
 
@@ -442,29 +415,6 @@ public interface FileContext {
             FileBackConstants.PROPERTY_TARGET_CHANNEL_SUPPLIER,
             targetChannelSupplier)
             .orElse(null);
-    }
-
-
-    /**
-     *
-     * @param servletResponse
-     *
-     * @return
-     *
-     * @deprecated Use {@link #targetChannelSupplier(java.util.function.Supplier)
-     * }
-     */
-    @Deprecated
-    default Supplier<WritableByteChannel> targetChannelSupplier(
-        final ServletResponse servletResponse) {
-
-        return targetChannelSupplier(servletResponse == null ? null : () -> {
-            try {
-                return Channels.newChannel(servletResponse.getOutputStream());
-            } catch (final IOException ioe) {
-                throw new RuntimeException(ioe);
-            }
-        });
     }
 
 
