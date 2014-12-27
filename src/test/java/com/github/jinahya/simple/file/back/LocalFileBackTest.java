@@ -46,10 +46,10 @@ public class LocalFileBackTest {
     private static final Logger logger = getLogger(lookup().lookupClass());
 
 
-    private static final String ROOT_PATH_FIELD_NAME = "localRoot";
+    private static final String ROOT_PATH_FIELD_NAME = "rootPath";
 
 
-    public static Path localRootValue(final LocalFileBack fileBack) {
+    public static Path rootPathValue(final LocalFileBack fileBack) {
 
         try {
             final Field field
@@ -66,8 +66,8 @@ public class LocalFileBackTest {
     }
 
 
-    public static void localRootValue(final LocalFileBack fileBack,
-                                      final Path localRoot) {
+    public static void rootPathValue(final LocalFileBack fileBack,
+                                     final Path localRoot) {
 
         try {
             final Field field
@@ -85,7 +85,7 @@ public class LocalFileBackTest {
 
 
     @Test(enabled = true, invocationCount = 128)
-    public static void localLeaf() throws IOException, FileBackException {
+    public static void leafPath() throws IOException, FileBackException {
 
         final Path localRoot = FileBackTests.randomLocalRoot();
 
@@ -94,12 +94,12 @@ public class LocalFileBackTest {
         fileContext.keyBufferSupplier(() -> FileBackTests.randomKeyBuffer());
 
         final Path localLeaf
-            = LocalFileBack.localLeaf(localRoot, fileContext, true);
+            = LocalFileBack.leafPath(localRoot, fileContext, true);
         assertTrue(Files.isDirectory(localLeaf.getParent()));
     }
 
 
-    private static LocalFileBack localRootInjected(
+    private static LocalFileBack rootPathInjected(
         final LocalFileBack fileBack) {
 
         if (fileBack == null) {
@@ -110,19 +110,19 @@ public class LocalFileBackTest {
     }
 
 
-    private static LocalFileBack localRootInjected() {
+    private static LocalFileBack rootPathInjected() {
 
         return current().nextBoolean()
                ? new LocalRootModule().inject(LocalFileBack.class)
-               : localRootInjected(new LocalFileBack());
+               : rootPathInjected(new LocalFileBack());
     }
 
 
     @Test(enabled = true, invocationCount = 128)
     public void read() throws IOException, FileBackException {
 
-        final FileBack fileBack = localRootInjected();
-        final Path localRoot = LocalFileBackTest.localRootValue(
+        final FileBack fileBack = rootPathInjected();
+        final Path localRoot = LocalFileBackTest.rootPathValue(
             (LocalFileBack) fileBack);
 
         final FileContext fileContext = new DefaultFileContext();
@@ -135,7 +135,7 @@ public class LocalFileBackTest {
         }
 
         final Path localLeaf
-            = LocalFileBack.localLeaf(localRoot, fileContext, true);
+            = LocalFileBack.leafPath(localRoot, fileContext, true);
         final byte[] expected = new byte[current().nextInt(0, 1024)];
         current().nextBytes(expected);
         Files.write(localLeaf, expected, StandardOpenOption.CREATE_NEW,
@@ -157,17 +157,17 @@ public class LocalFileBackTest {
     @Test(enabled = true, invocationCount = 128)
     public void update() throws IOException, FileBackException {
 
-        final LocalFileBack fileBack = localRootInjected();
-        final Path localRoot = LocalFileBackTest.localRootValue(fileBack);
+        final LocalFileBack fileBack = rootPathInjected();
+        final Path localRoot = LocalFileBackTest.rootPathValue(fileBack);
 
         final FileContext fileContext = new DefaultFileContext();
 
         final ByteBuffer keyBuffer = FileBackTests.randomKeyBuffer();
         fileContext.keyBufferSupplier(() -> keyBuffer);
 
-        fileContext.localLeafConsumer(localLeaf -> {
-            logger.debug("localLeaf: {}", localLeaf);
-        });
+//        fileContext.localLeafConsumer(localLeaf -> {
+//            logger.debug("localLeaf: {}", localLeaf);
+//        });
 
         fileContext.pathNameConsumer(
             pathName -> {
@@ -179,7 +179,7 @@ public class LocalFileBackTest {
         }
 
         final Path localLeaf
-            = LocalFileBack.localLeaf(localRoot, fileContext, true);
+            = LocalFileBack.leafPath(localRoot, fileContext, true);
         logger.debug("localLeaf: {}", localLeaf);
 
         final byte[] expected = new byte[current().nextInt(0, 1024)];

@@ -24,7 +24,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
@@ -285,23 +284,23 @@ public interface FileContext {
     }
 
 
-    @SuppressWarnings("unchecked")
-    default Consumer<Path> localLeafConsumer() {
+//    @SuppressWarnings("unchecked")
+//    default Consumer<Path> localLeafConsumer() {
+//
+//        return (Consumer<Path>) property(
+//            FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER)
+//            .orElse(null);
+//    }
 
-        return (Consumer<Path>) property(
-            FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER)
-            .orElse(null);
-    }
 
-
-    @SuppressWarnings("unchecked")
-    default Consumer<Path> localLeafConsumer(
-        final Consumer<Path> localLeafConsumer) {
-
-        return (Consumer<Path>) property(
-            FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER, localLeafConsumer)
-            .orElse(null);
-    }
+//    @SuppressWarnings("unchecked")
+//    default Consumer<Path> localLeafConsumer(
+//        final Consumer<Path> localLeafConsumer) {
+//
+//        return (Consumer<Path>) property(
+//            FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER, localLeafConsumer)
+//            .orElse(null);
+//    }
 
 
     @SuppressWarnings("unchecked")

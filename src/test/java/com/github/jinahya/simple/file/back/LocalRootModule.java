@@ -41,7 +41,7 @@ public class LocalRootModule extends AbstractModule {
     protected void configure() {
 
         bind(Path.class)
-            .annotatedWith(LocalRoot.class)
+            .annotatedWith(RootPath.class)
             .toInstance(FileBackTests.randomLocalRoot());
     }
 

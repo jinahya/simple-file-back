@@ -81,18 +81,12 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/path_name_supplier";
 
 
-    public static final String PROPERTY_LOCAL_ROOT_CONSUMER
-        = PROPERTY_PREFIX + "/local_root_supplier";
-
-
-    public static final String PROPERTY_LOCAL_LEAF_SUPPLIER
-        = PROPERTY_PREFIX + "/local_leaf_supplier";
-
-
-    public static final String PROPERTY_LOCAL_LEAF_CONSUMER
-        = PROPERTY_PREFIX + "/local_leaf_consumer";
-
-
+//    public static final String PROPERTY_LOCAL_ROOT_CONSUMER
+//        = PROPERTY_PREFIX + "/local_root_supplier";
+//    public static final String PROPERTY_LOCAL_LEAF_SUPPLIER
+//        = PROPERTY_PREFIX + "/local_leaf_supplier";
+//    public static final String PROPERTY_LOCAL_LEAF_CONSUMER
+//        = PROPERTY_PREFIX + "/local_leaf_consumer";
     private FileBackConstants() {
 
         super();
