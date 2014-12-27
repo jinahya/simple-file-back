@@ -30,12 +30,36 @@ public interface FileBack {
     void locate(FileContext context) throws IOException, FileBackException;
 
 
+    /**
+     * Reads file content.
+     *
+     * @param context
+     *
+     * @throws IOException
+     * @throws FileBackException
+     */
     void read(FileContext context) throws IOException, FileBackException;
 
 
+    /**
+     * Updates file content.
+     *
+     * @param context
+     *
+     * @throws IOException
+     * @throws FileBackException
+     */
     void update(FileContext context) throws IOException, FileBackException;
 
 
+    /**
+     * Deletes file.
+     *
+     * @param context
+     *
+     * @throws IOException
+     * @throws FileBackException
+     */
     void delete(FileContext context) throws IOException, FileBackException;
 
 
