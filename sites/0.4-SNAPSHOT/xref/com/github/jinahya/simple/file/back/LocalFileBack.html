@@ -53,8 +53,8 @@
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>          = FileBackConstants.PROPERTY_PREFIX + <span class="jxr_string">"/local_file_back"</span>;
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <strong class="jxr_keyword">static</strong> Path localLeaf(<strong class="jxr_keyword">final</strong> Path localRoot, <strong class="jxr_keyword">final</strong> <a href="../../../../../../com/github/jinahya/simple/file/back/FileContext.html">FileContext</a> fileContext,
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>                            <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> createParent)
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>      <strong class="jxr_keyword">static</strong> Path leafPath(<strong class="jxr_keyword">final</strong> Path localRoot, <strong class="jxr_keyword">final</strong> <a href="../../../../../../com/github/jinahya/simple/file/back/FileContext.html">FileContext</a> fileContext,
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>                           <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> createParent)
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>          <strong class="jxr_keyword">throws</strong> IOException, <a href="../../../../../../com/github/jinahya/simple/file/back/FileBackException.html">FileBackException</a> {
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>          <strong class="jxr_keyword">final</strong> Logger logger = getLogger(lookup().lookupClass());
@@ -79,21 +79,21 @@
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>          Optional.ofNullable(fileContext.pathNameConsumer()).orElse(v -&gt; {
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>          }).accept(pathName);
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>          <strong class="jxr_keyword">final</strong> Path localLeaf = localRoot.resolve(
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>          <strong class="jxr_keyword">final</strong> Path leafPath = localRoot.resolve(
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>              pathName.replace(<span class="jxr_string">"/"</span>, localRoot.getFileSystem().getSeparator()));
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>          logger.debug(<span class="jxr_string">"localLeaf: {}"</span>, localLeaf);
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>          Optional.ofNullable(fileContext.localLeafConsumer()).orElse(v -&gt; {
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>          }).accept(localLeaf);
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>          logger.debug(<span class="jxr_string">"leafPath: {}"</span>, leafPath);
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_comment">//        Optional.ofNullable(fileContext.localLeafConsumer()).orElse(v -&gt; {</em>
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_comment">//        }).accept(localLeaf);</em>
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>          <strong class="jxr_keyword">if</strong> (createParent) {
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>              <strong class="jxr_keyword">final</strong> Path parent = localLeaf.getParent();
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>              <strong class="jxr_keyword">final</strong> Path parent = leafPath.getParent();
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>              <strong class="jxr_keyword">if</strong> (!Files.isDirectory(parent)) {
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>                  Files.createDirectories(parent);
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>                  logger.debug(<span class="jxr_string">"parent created: {}"</span>, parent);
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>              }
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>          }
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>          <strong class="jxr_keyword">return</strong> localLeaf;
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>          <strong class="jxr_keyword">return</strong> leafPath;
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>      }
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  
@@ -112,14 +112,14 @@
 <a class="jxr_linenumber" name="L104" href="#L104">104</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../com/github/jinahya/simple/file/back/FileBackException.html">FileBackException</a>(<span class="jxr_string">"no pathName supplied"</span>);
 <a class="jxr_linenumber" name="L105" href="#L105">105</a>         }
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 
-<a class="jxr_linenumber" name="L107" href="#L107">107</a>         <strong class="jxr_keyword">final</strong> Path localLeaf = localRoot.resolve(pathName);
-<a class="jxr_linenumber" name="L108" href="#L108">108</a>         logger.debug(<span class="jxr_string">"localLeaf: {}"</span>, localLeaf);
-<a class="jxr_linenumber" name="L109" href="#L109">109</a>         logger.debug(<span class="jxr_string">"localLeaf.regularFile: {}"</span>, Files.isRegularFile(localLeaf));
-<a class="jxr_linenumber" name="L110" href="#L110">110</a>         logger.debug(<span class="jxr_string">"localLeaf.readable: {}"</span>, Files.isReadable(localLeaf));
-<a class="jxr_linenumber" name="L111" href="#L111">111</a>         Optional.ofNullable(fileContext.localLeafConsumer()).orElse(v -&gt; {
-<a class="jxr_linenumber" name="L112" href="#L112">112</a>         }).accept(localLeaf);
+<a class="jxr_linenumber" name="L107" href="#L107">107</a>         <strong class="jxr_keyword">final</strong> Path leafPath = rootPath.resolve(pathName);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a>         logger.debug(<span class="jxr_string">"leafPath: {}"</span>, leafPath);
+<a class="jxr_linenumber" name="L109" href="#L109">109</a>         logger.debug(<span class="jxr_string">"leafPath.regularFile: {}"</span>, Files.isRegularFile(leafPath));
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>         logger.debug(<span class="jxr_string">"leafPath.readable: {}"</span>, Files.isReadable(leafPath));
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_comment">//        Optional.ofNullable(fileContext.localLeafConsumer()).orElse(v -&gt; {</em>
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_comment">//        }).accept(localLeaf);</em>
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 
-<a class="jxr_linenumber" name="L114" href="#L114">114</a>         <strong class="jxr_keyword">if</strong> (!Files.isRegularFile(localLeaf) || !Files.isReadable(localLeaf)) {
+<a class="jxr_linenumber" name="L114" href="#L114">114</a>         <strong class="jxr_keyword">if</strong> (!Files.isRegularFile(leafPath) || !Files.isReadable(leafPath)) {
 <a class="jxr_linenumber" name="L115" href="#L115">115</a>             Optional.ofNullable(fileContext.targetCopiedConsumer())
 <a class="jxr_linenumber" name="L116" href="#L116">116</a>                 .orElse(v -&gt; {
 <a class="jxr_linenumber" name="L117" href="#L117">117</a>                 }).accept(-1L);
@@ -133,7 +133,7 @@
 <a class="jxr_linenumber" name="L125" href="#L125">125</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../com/github/jinahya/simple/file/back/FileBackException.html">FileBackException</a>(<span class="jxr_string">"no targetChannel supplied"</span>);
 <a class="jxr_linenumber" name="L126" href="#L126">126</a>         }
 <a class="jxr_linenumber" name="L127" href="#L127">127</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> targetCopied = Files.copy(
-<a class="jxr_linenumber" name="L128" href="#L128">128</a>             localLeaf, Channels.newOutputStream(targetChannel));
+<a class="jxr_linenumber" name="L128" href="#L128">128</a>             leafPath, Channels.newOutputStream(targetChannel));
 <a class="jxr_linenumber" name="L129" href="#L129">129</a>         logger.debug(<span class="jxr_string">"targetCopied: {}"</span>, targetCopied);
 <a class="jxr_linenumber" name="L130" href="#L130">130</a>         Optional.ofNullable(fileContext.targetCopiedConsumer()).orElse(v -&gt; {
 <a class="jxr_linenumber" name="L131" href="#L131">131</a>         }).accept(targetCopied);
@@ -148,13 +148,13 @@
 <a class="jxr_linenumber" name="L140" href="#L140">140</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"null fileContext"</span>);
 <a class="jxr_linenumber" name="L141" href="#L141">141</a>         }
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 
-<a class="jxr_linenumber" name="L143" href="#L143">143</a>         <strong class="jxr_keyword">final</strong> Path localLeaf = localLeaf(localRoot, fileContext, false);
+<a class="jxr_linenumber" name="L143" href="#L143">143</a>         <strong class="jxr_keyword">final</strong> Path leafPath = leafPath(rootPath, fileContext, false);
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 
-<a class="jxr_linenumber" name="L145" href="#L145">145</a>         <strong class="jxr_keyword">if</strong> (!Files.isReadable(localLeaf)) {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a>         <strong class="jxr_keyword">if</strong> (!Files.isReadable(leafPath)) {
 <a class="jxr_linenumber" name="L146" href="#L146">146</a>             Optional.ofNullable(fileContext.targetCopiedConsumer())
 <a class="jxr_linenumber" name="L147" href="#L147">147</a>                 .orElse(v -&gt; {
 <a class="jxr_linenumber" name="L148" href="#L148">148</a>                 }).accept(-1L);
-<a class="jxr_linenumber" name="L149" href="#L149">149</a>             logger.error(<span class="jxr_string">"localLeaf is not readable: {}"</span>, localLeaf);
+<a class="jxr_linenumber" name="L149" href="#L149">149</a>             logger.error(<span class="jxr_string">"leafPath is not readable: {}"</span>, leafPath);
 <a class="jxr_linenumber" name="L150" href="#L150">150</a>             <strong class="jxr_keyword">return</strong>;
 <a class="jxr_linenumber" name="L151" href="#L151">151</a>         }
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> 
@@ -165,7 +165,7 @@
 <a class="jxr_linenumber" name="L157" href="#L157">157</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../../com/github/jinahya/simple/file/back/FileBackException.html">FileBackException</a>(<span class="jxr_string">"no targetChannel supplied"</span>);
 <a class="jxr_linenumber" name="L158" href="#L158">158</a>         }
 <a class="jxr_linenumber" name="L159" href="#L159">159</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> targetCopied = Files.copy(
-<a class="jxr_linenumber" name="L160" href="#L160">160</a>             localLeaf, Channels.newOutputStream(targetChannel));
+<a class="jxr_linenumber" name="L160" href="#L160">160</a>             leafPath, Channels.newOutputStream(targetChannel));
 <a class="jxr_linenumber" name="L161" href="#L161">161</a>         logger.debug(<span class="jxr_string">"targetCopied: {}"</span>, targetCopied);
 <a class="jxr_linenumber" name="L162" href="#L162">162</a>         Optional.ofNullable(fileContext.targetCopiedConsumer()).orElse(v -&gt; {
 <a class="jxr_linenumber" name="L163" href="#L163">163</a>         }).accept(targetCopied);
@@ -180,7 +180,7 @@
 <a class="jxr_linenumber" name="L172" href="#L172">172</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"null fileContext"</span>);
 <a class="jxr_linenumber" name="L173" href="#L173">173</a>         }
 <a class="jxr_linenumber" name="L174" href="#L174">174</a> 
-<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <strong class="jxr_keyword">final</strong> Path localLeaf = localLeaf(localRoot, fileContext, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L175" href="#L175">175</a>         <strong class="jxr_keyword">final</strong> Path leafPath = leafPath(rootPath, fileContext, <strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L176" href="#L176">176</a> 
 <a class="jxr_linenumber" name="L177" href="#L177">177</a>         <strong class="jxr_keyword">final</strong> ReadableByteChannel sourceChannel = Optional.ofNullable(
 <a class="jxr_linenumber" name="L178" href="#L178">178</a>             fileContext.sourceChannelSupplier()).orElse(() -&gt; <strong class="jxr_keyword">null</strong>).get();
@@ -190,7 +190,7 @@
 <a class="jxr_linenumber" name="L182" href="#L182">182</a>         }
 <a class="jxr_linenumber" name="L183" href="#L183">183</a> 
 <a class="jxr_linenumber" name="L184" href="#L184">184</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> sourceCopied = Files.copy(
-<a class="jxr_linenumber" name="L185" href="#L185">185</a>             Channels.newInputStream(sourceChannel), localLeaf,
+<a class="jxr_linenumber" name="L185" href="#L185">185</a>             Channels.newInputStream(sourceChannel), leafPath,
 <a class="jxr_linenumber" name="L186" href="#L186">186</a>             StandardCopyOption.REPLACE_EXISTING);
 <a class="jxr_linenumber" name="L187" href="#L187">187</a>         logger.debug(<span class="jxr_string">"sourceCopied: {}"</span>, sourceCopied);
 <a class="jxr_linenumber" name="L188" href="#L188">188</a>         Optional.ofNullable(fileContext.sourceCopiedConsumer())
@@ -207,10 +207,10 @@
 <a class="jxr_linenumber" name="L199" href="#L199">199</a>             <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"null fileContext"</span>);
 <a class="jxr_linenumber" name="L200" href="#L200">200</a>         }
 <a class="jxr_linenumber" name="L201" href="#L201">201</a> 
-<a class="jxr_linenumber" name="L202" href="#L202">202</a>         <strong class="jxr_keyword">final</strong> Path localLeaf = localLeaf(localRoot, fileContext, false);
-<a class="jxr_linenumber" name="L203" href="#L203">203</a>         logger.debug(<span class="jxr_string">"localLeaf: {}"</span>, localLeaf);
+<a class="jxr_linenumber" name="L202" href="#L202">202</a>         <strong class="jxr_keyword">final</strong> Path leafPath = leafPath(rootPath, fileContext, false);
+<a class="jxr_linenumber" name="L203" href="#L203">203</a>         logger.debug(<span class="jxr_string">"leafPath: {}"</span>, leafPath);
 <a class="jxr_linenumber" name="L204" href="#L204">204</a> 
-<a class="jxr_linenumber" name="L205" href="#L205">205</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> deleted = Files.deleteIfExists(localLeaf);
+<a class="jxr_linenumber" name="L205" href="#L205">205</a>         <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">boolean</strong> deleted = Files.deleteIfExists(leafPath);
 <a class="jxr_linenumber" name="L206" href="#L206">206</a>         logger.debug(<span class="jxr_string">"deleted: {}"</span>, deleted);
 <a class="jxr_linenumber" name="L207" href="#L207">207</a>     }
 <a class="jxr_linenumber" name="L208" href="#L208">208</a> 
@@ -219,8 +219,8 @@
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> 
 <a class="jxr_linenumber" name="L212" href="#L212">212</a> 
 <a class="jxr_linenumber" name="L213" href="#L213">213</a>     @Inject
-<a class="jxr_linenumber" name="L214" href="#L214">214</a>     @LocalRoot
-<a class="jxr_linenumber" name="L215" href="#L215">215</a>     <strong class="jxr_keyword">private</strong> Path localRoot;
+<a class="jxr_linenumber" name="L214" href="#L214">214</a>     @RootPath
+<a class="jxr_linenumber" name="L215" href="#L215">215</a>     <strong class="jxr_keyword">private</strong> Path rootPath;
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 
 <a class="jxr_linenumber" name="L217" href="#L217">217</a> 
 <a class="jxr_linenumber" name="L218" href="#L218">218</a> }
