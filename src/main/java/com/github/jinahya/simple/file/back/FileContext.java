@@ -26,8 +26,6 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.LongConsumer;
-import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 
@@ -248,59 +246,64 @@ public interface FileContext {
     }
 
 
-    default LongConsumer contentLengthConsumer() {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> contentLengthConsumer() {
 
-        return (LongConsumer) property(
+        return (Consumer<Long>) property(
             FileBackConstants.PROPERTY_CONTENT_LENGTH_CONSUMER)
             .orElse(null);
     }
 
 
-    default LongConsumer contentLengthConsumer(
-        final LongConsumer contentLengthConsumer) {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> contentLengthConsumer(
+        final Consumer<Long> contentLengthConsumer) {
 
-        return (LongConsumer) property(
+        return (Consumer<Long>) property(
             FileBackConstants.PROPERTY_CONTENT_LENGTH_CONSUMER,
             contentLengthConsumer)
             .orElse(null);
     }
 
 
-    default LongSupplier contentLengthSupplier() {
+    @SuppressWarnings("unchecked")
+    default Supplier<Long> contentLengthSupplier() {
 
-        return (LongSupplier) property(
+        return (Supplier<Long>) property(
             FileBackConstants.PROPERTY_CONTENT_LENGTH_SUPPLIER)
             .orElse(null);
     }
 
 
-    default LongSupplier contentLengthSupplier(
-        final LongSupplier contentLengthSupplier) {
+    @SuppressWarnings("unchecked")
+    default Supplier<Long> contentLengthSupplier(
+        final Supplier<Long> contentLengthSupplier) {
 
-        return (LongSupplier) property(
+        return (Supplier<Long>) property(
             FileBackConstants.PROPERTY_CONTENT_LENGTH_SUPPLIER,
             contentLengthSupplier)
             .orElse(null);
     }
 
 
-//    @SuppressWarnings("unchecked")
-//    default Consumer<Path> localLeafConsumer() {
-//
-//        return (Consumer<Path>) property(
-//            FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER)
-//            .orElse(null);
-//    }
+    @SuppressWarnings("unchecked")
+    default Consumer<Boolean> fileDeletedConsumer() {
+
+        return (Consumer<Boolean>) property(
+            FileBackConstants.PROPERTY_FILE_DELETED_CONSUMER)
+            .orElse(null);
+    }
 
 
-//    @SuppressWarnings("unchecked")
-//    default Consumer<Path> localLeafConsumer(
-//        final Consumer<Path> localLeafConsumer) {
-//
-//        return (Consumer<Path>) property(
-//            FileBackConstants.PROPERTY_LOCAL_LEAF_CONSUMER, localLeafConsumer)
-//            .orElse(null);
-//    }
+    @SuppressWarnings("unchecked")
+    default Consumer<Boolean> fileDeletedConsumer(
+        final Consumer<Boolean> fileDeletedConsumer) {
+
+        return (Consumer<Boolean>) property(
+            FileBackConstants.PROPERTY_FILE_DELETED_CONSUMER,
+            fileDeletedConsumer)
+            .orElse(null);
+    }
 
 
     @SuppressWarnings("unchecked")
@@ -417,36 +420,40 @@ public interface FileContext {
     }
 
 
-    default LongConsumer sourceCopiedConsumer() {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> sourceCopiedConsumer() {
 
-        return (LongConsumer) property(
+        return (Consumer<Long>) property(
             FileBackConstants.PROPERTY_SOURCE_COPIED_CONSUMER)
             .orElse(null);
     }
 
 
-    default LongConsumer sourceCopiedConsumer(
-        final LongConsumer sourceCopiedConsumer) {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> sourceCopiedConsumer(
+        final Consumer<Long> sourceCopiedConsumer) {
 
-        return (LongConsumer) property(
+        return (Consumer<Long>) property(
             FileBackConstants.PROPERTY_SOURCE_COPIED_CONSUMER,
             sourceCopiedConsumer)
             .orElse(null);
     }
 
 
-    default LongConsumer targetCopiedConsumer() {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> targetCopiedConsumer() {
 
-        return (LongConsumer) property(
+        return (Consumer<Long>) property(
             FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER)
             .orElse(null);
     }
 
 
-    default LongConsumer targetCopiedConsumer(
-        final LongConsumer targetCopiedConsumer) {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> targetCopiedConsumer(
+        final Consumer<Long> targetCopiedConsumer) {
 
-        return (LongConsumer) property(
+        return (Consumer<Long>) property(
             FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER,
             targetCopiedConsumer)
             .orElse(null);

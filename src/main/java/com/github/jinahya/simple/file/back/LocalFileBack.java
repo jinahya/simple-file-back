@@ -74,8 +74,6 @@ public class LocalFileBack implements FileBack {
         final Path leafPath = localRoot.resolve(
             pathName.replace("/", localRoot.getFileSystem().getSeparator()));
         logger.debug("leafPath: {}", leafPath);
-//        Optional.ofNullable(fileContext.localLeafConsumer()).orElse(v -> {
-//        }).accept(localLeaf);
 
         if (createParent) {
             final Path parent = leafPath.getParent();
@@ -108,27 +106,27 @@ public class LocalFileBack implements FileBack {
         logger.debug("leafPath: {}", leafPath);
         logger.debug("leafPath.regularFile: {}", Files.isRegularFile(leafPath));
         logger.debug("leafPath.readable: {}", Files.isReadable(leafPath));
-//        Optional.ofNullable(fileContext.localLeafConsumer()).orElse(v -> {
-//        }).accept(localLeaf);
 
         if (!Files.isRegularFile(leafPath) || !Files.isReadable(leafPath)) {
             Optional.ofNullable(fileContext.targetCopiedConsumer())
-                .orElse(v -> {
-                }).accept(-1L);
+                .ifPresent(c -> c.accept(null));
             return;
         }
 
-        final WritableByteChannel targetChannel = Optional.ofNullable(
-            fileContext.targetChannelSupplier()).orElse(() -> null).get();
+        final WritableByteChannel targetChannel = Optional
+            .ofNullable(fileContext.targetChannelSupplier())
+            .orElseThrow(
+                () -> new FileBackException("no targetChannelSupplier"))
+            .get();
         logger.debug("targetChannel: {}", targetChannel);
         if (targetChannel == null) {
-            throw new FileBackException("no targetChannel supplied");
+            throw new FileBackException("null targetChannel supplied");
         }
         final long targetCopied = Files.copy(
             leafPath, Channels.newOutputStream(targetChannel));
         logger.debug("targetCopied: {}", targetCopied);
-        Optional.ofNullable(fileContext.targetCopiedConsumer()).orElse(v -> {
-        }).accept(targetCopied);
+        Optional.ofNullable(fileContext.targetCopiedConsumer())
+            .ifPresent(c -> c.accept(targetCopied));
     }
 
 
@@ -143,24 +141,26 @@ public class LocalFileBack implements FileBack {
         final Path leafPath = leafPath(rootPath, fileContext, false);
 
         if (!Files.isReadable(leafPath)) {
-            Optional.ofNullable(fileContext.targetCopiedConsumer())
-                .orElse(v -> {
-                }).accept(-1L);
             logger.error("leafPath is not readable: {}", leafPath);
+            Optional.ofNullable(fileContext.targetCopiedConsumer())
+                .ifPresent(c -> c.accept(null));
             return;
         }
 
-        final WritableByteChannel targetChannel = Optional.ofNullable(
-            fileContext.targetChannelSupplier()).orElse(() -> null).get();
+        final WritableByteChannel targetChannel = Optional
+            .ofNullable(fileContext.targetChannelSupplier())
+            .orElseThrow(
+                () -> new FileBackException("no targetChannelSupplier"))
+            .get();
         logger.debug("targetChannel: {}", targetChannel);
         if (targetChannel == null) {
-            throw new FileBackException("no targetChannel supplied");
+            throw new FileBackException("null targetChannel supplied");
         }
         final long targetCopied = Files.copy(
             leafPath, Channels.newOutputStream(targetChannel));
         logger.debug("targetCopied: {}", targetCopied);
-        Optional.ofNullable(fileContext.targetCopiedConsumer()).orElse(v -> {
-        }).accept(targetCopied);
+        Optional.ofNullable(fileContext.targetCopiedConsumer())
+            .ifPresent(c -> c.accept(targetCopied));
     }
 
 
@@ -174,11 +174,14 @@ public class LocalFileBack implements FileBack {
 
         final Path leafPath = leafPath(rootPath, fileContext, true);
 
-        final ReadableByteChannel sourceChannel = Optional.ofNullable(
-            fileContext.sourceChannelSupplier()).orElse(() -> null).get();
+        final ReadableByteChannel sourceChannel = Optional
+            .ofNullable(fileContext.sourceChannelSupplier())
+            .orElseThrow(
+                () -> new FileBackException("no sourceChannelSupplier"))
+            .get();
         logger.debug("sourceChannel: {}", sourceChannel);
         if (sourceChannel == null) {
-            throw new FileBackException("no sourceChannel supplied");
+            throw new FileBackException("null sourceChannel supplied");
         }
 
         final long sourceCopied = Files.copy(
@@ -186,8 +189,7 @@ public class LocalFileBack implements FileBack {
             StandardCopyOption.REPLACE_EXISTING);
         logger.debug("sourceCopied: {}", sourceCopied);
         Optional.ofNullable(fileContext.sourceCopiedConsumer())
-            .orElse(v -> {
-            }).accept(sourceCopied);
+            .ifPresent(c -> c.accept(sourceCopied));
     }
 
 
@@ -202,8 +204,11 @@ public class LocalFileBack implements FileBack {
         final Path leafPath = leafPath(rootPath, fileContext, false);
         logger.debug("leafPath: {}", leafPath);
 
-        final boolean deleted = Files.deleteIfExists(leafPath);
-        logger.debug("deleted: {}", deleted);
+        final boolean fileDeleted = Files.deleteIfExists(leafPath);
+        logger.debug("fileDeleted: {}", fileDeleted);
+
+        Optional.ofNullable(fileContext.fileDeletedConsumer())
+            .ifPresent(c -> c.accept(fileDeleted));
     }
 
 
