@@ -27,7 +27,10 @@ import java.io.IOException;
 public interface FileBack {
 
 
-    void locate(FileContext context) throws IOException, FileBackException;
+    //void locate(FileContext context) throws IOException, FileBackException;
+
+
+    void copy(FileContext context) throws IOException, FileBackException;
 
 
     /**

@@ -18,11 +18,8 @@
 package com.github.jinahya.simple.file.back;
 
 
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -150,6 +147,46 @@ public interface FileContext {
 
         return (Supplier<ByteBuffer>) property(
             FileBackConstants.PROPERTY_KEY_BUFFER_SUPPLIER, keyBytesSupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> sourceKeyBufferSupplier() {
+
+        return (Supplier<ByteBuffer>) property(
+            FileBackConstants.PROPERTY_SOURCE_KEY_BUFFER_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> sourceKeyBufferSupplier(
+        final Supplier<ByteBuffer> sourceKeyBytesSupplier) {
+
+        return (Supplier<ByteBuffer>) property(
+            FileBackConstants.PROPERTY_SOURCE_KEY_BUFFER_SUPPLIER,
+            sourceKeyBytesSupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> targetKeyBufferSupplier() {
+
+        return (Supplier<ByteBuffer>) property(
+            FileBackConstants.PROPERTY_TARGET_KEY_BUFFER_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> targetKeyBufferSupplier(
+        final Supplier<ByteBuffer> targetKeyBytesSupplier) {
+
+        return (Supplier<ByteBuffer>) property(
+            FileBackConstants.PROPERTY_TARGET_KEY_BUFFER_SUPPLIER,
+            targetKeyBytesSupplier)
             .orElse(null);
     }
 
@@ -344,80 +381,98 @@ public interface FileContext {
     }
 
 
+//    @SuppressWarnings("unchecked")
+//    default Supplier<ReadableByteChannel> sourceChannelSupplier() {
+//
+//        return (Supplier<ReadableByteChannel>) property(
+//            FileBackConstants.PROPERTY_SOURCE_CHANNEL_SUPPLIER)
+//            .orElse(null);
+//    }
+//
+//
+//    @SuppressWarnings("unchecked")
+//    default Supplier<ReadableByteChannel> sourceChannelSupplier(
+//        final Supplier<ReadableByteChannel> sourceChannelSupplier) {
+//
+//        return (Supplier<ReadableByteChannel>) property(
+//            FileBackConstants.PROPERTY_SOURCE_CHANNEL_SUPPLIER,
+//            sourceChannelSupplier)
+//            .orElse(null);
+//    }
     @SuppressWarnings("unchecked")
-    default Supplier<ReadableByteChannel> sourceChannelSupplier() {
+    default Consumer<ReadableByteChannel> sourceChannelConsumer() {
 
-        return (Supplier<ReadableByteChannel>) property(
-            FileBackConstants.PROPERTY_SOURCE_CHANNEL_SUPPLIER)
+        return (Consumer<ReadableByteChannel>) property(
+            FileBackConstants.PROPERTY_SOURCE_CHANNEL_CONSUMER)
             .orElse(null);
     }
 
 
     @SuppressWarnings("unchecked")
-    default Supplier<ReadableByteChannel> sourceChannelSupplier(
-        final Supplier<ReadableByteChannel> sourceChannelSupplier) {
+    default Consumer<ReadableByteChannel> sourceChannelConsumer(
+        final Consumer<ReadableByteChannel> sourceChannelSupplier) {
 
-        return (Supplier<ReadableByteChannel>) property(
-            FileBackConstants.PROPERTY_SOURCE_CHANNEL_SUPPLIER,
+        return (Consumer<ReadableByteChannel>) property(
+            FileBackConstants.PROPERTY_SOURCE_CHANNEL_CONSUMER,
             sourceChannelSupplier)
             .orElse(null);
     }
 
 
-    /**
-     *
-     * @param sourceChannel
-     *
-     * @return
-     *
-     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
-     * }
-     */
-    @Deprecated
-    default Supplier<ReadableByteChannel> sourceChannelSupplier(
-        final ReadableByteChannel sourceChannel) {
-
-        return sourceChannelSupplier(
-            sourceChannel == null ? null : () -> sourceChannel);
-    }
-
-
-    /**
-     *
-     * @param sourceStream
-     *
-     * @return
-     *
-     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
-     * }
-     */
-    @Deprecated
-    default Supplier<ReadableByteChannel> sourceChannelSupplier(
-        final InputStream sourceStream) {
-
-        return sourceChannelSupplier(
-            sourceStream == null ? null : Channels.newChannel(sourceStream));
-    }
+//    /**
+//     *
+//     * @param sourceChannel
+//     *
+//     * @return
+//     *
+//     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
+//     * }
+//     */
+//    @Deprecated
+//    default Supplier<ReadableByteChannel> sourceChannelSupplier(
+//        final ReadableByteChannel sourceChannel) {
+//
+//        return sourceChannelSupplier(
+//            sourceChannel == null ? null : () -> sourceChannel);
+//    }
 
 
-    @SuppressWarnings("unchecked")
-    default Supplier<WritableByteChannel> targetChannelSupplier() {
+//    /**
+//     *
+//     * @param sourceStream
+//     *
+//     * @return
+//     *
+//     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
+//     * }
+//     */
+//    @Deprecated
+//    default Supplier<ReadableByteChannel> sourceChannelSupplier(
+//        final InputStream sourceStream) {
+//
+//        return sourceChannelSupplier(
+//            sourceStream == null ? null : Channels.newChannel(sourceStream));
+//    }
 
-        return (Supplier<WritableByteChannel>) property(
-            FileBackConstants.PROPERTY_TARGET_CHANNEL_SUPPLIER)
-            .orElse(null);
-    }
 
-
-    @SuppressWarnings("unchecked")
-    default Supplier<WritableByteChannel> targetChannelSupplier(
-        final Supplier<WritableByteChannel> targetChannelSupplier) {
-
-        return (Supplier<WritableByteChannel>) property(
-            FileBackConstants.PROPERTY_TARGET_CHANNEL_SUPPLIER,
-            targetChannelSupplier)
-            .orElse(null);
-    }
+//    @SuppressWarnings("unchecked")
+//    default Supplier<WritableByteChannel> targetChannelSupplier() {
+//
+//        return (Supplier<WritableByteChannel>) property(
+//            FileBackConstants.PROPERTY_TARGET_CHANNEL_SUPPLIER)
+//            .orElse(null);
+//    }
+//
+//
+//    @SuppressWarnings("unchecked")
+//    default Supplier<WritableByteChannel> targetChannelSupplier(
+//        final Supplier<WritableByteChannel> targetChannelSupplier) {
+//
+//        return (Supplier<WritableByteChannel>) property(
+//            FileBackConstants.PROPERTY_TARGET_CHANNEL_SUPPLIER,
+//            targetChannelSupplier)
+//            .orElse(null);
+//    }
 
 
     @SuppressWarnings("unchecked")
@@ -440,24 +495,24 @@ public interface FileContext {
     }
 
 
-    @SuppressWarnings("unchecked")
-    default Consumer<Long> targetCopiedConsumer() {
-
-        return (Consumer<Long>) property(
-            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Consumer<Long> targetCopiedConsumer(
-        final Consumer<Long> targetCopiedConsumer) {
-
-        return (Consumer<Long>) property(
-            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER,
-            targetCopiedConsumer)
-            .orElse(null);
-    }
+//    @SuppressWarnings("unchecked")
+//    default Consumer<Long> targetCopiedConsumer() {
+//
+//        return (Consumer<Long>) property(
+//            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER)
+//            .orElse(null);
+//    }
+//
+//
+//    @SuppressWarnings("unchecked")
+//    default Consumer<Long> targetCopiedConsumer(
+//        final Consumer<Long> targetCopiedConsumer) {
+//
+//        return (Consumer<Long>) property(
+//            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER,
+//            targetCopiedConsumer)
+//            .orElse(null);
+//    }
 
 
 }

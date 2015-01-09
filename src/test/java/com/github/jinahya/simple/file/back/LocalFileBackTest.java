@@ -119,7 +119,7 @@ public class LocalFileBackTest {
 
 
     @Test(enabled = true, invocationCount = 128)
-    public void read() throws IOException, FileBackException {
+    public void readWithKeyBuffer() throws IOException, FileBackException {
 
         final FileBack fileBack = rootPathInjected();
         final Path localRoot = LocalFileBackTest.rootPathValue(

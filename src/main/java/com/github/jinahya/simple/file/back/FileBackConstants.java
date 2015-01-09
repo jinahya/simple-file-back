@@ -38,6 +38,14 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/key_buffer_supplier";
 
 
+    public static final String PROPERTY_SOURCE_KEY_BUFFER_SUPPLIER
+        = PROPERTY_PREFIX + "/source_key_buffer_supplier";
+
+
+    public static final String PROPERTY_TARGET_KEY_BUFFER_SUPPLIER
+        = PROPERTY_PREFIX + "/target_key_buffer_supplier";
+
+
     public static final String PROPERTY_FILE_SUFFIX_CONSUMER
         = PROPERTY_PREFIX + "/file_suffix_consumer";
 
@@ -62,8 +70,12 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/content_length_suppplier";
 
 
-    public static final String PROPERTY_SOURCE_CHANNEL_SUPPLIER
-        = PROPERTY_PREFIX + "/source_channel_supplier";
+    public static final String PROPERTY_SOURCE_CHANNEL_CONSUMER
+        = PROPERTY_PREFIX + "/source_channel_consumer";
+
+
+//    public static final String PROPERTY_SOURCE_CHANNEL_SUPPLIER
+//        = PROPERTY_PREFIX + "/source_channel_supplier";
 
 
     public static final String PROPERTY_SOURCE_COPIED_CONSUMER
