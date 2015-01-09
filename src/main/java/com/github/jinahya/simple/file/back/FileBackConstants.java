@@ -19,6 +19,7 @@ package com.github.jinahya.simple.file.back;
 
 
 /**
+ * Constants for file back.
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
@@ -37,6 +38,10 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/key_buffer_supplier";
 
 
+    public static final String PROPERTY_FILE_SUFFIX_CONSUMER
+        = PROPERTY_PREFIX + "/file_suffix_consumer";
+
+
     public static final String PROPERTY_FILE_SUFFIX_SUPPLIER
         = PROPERTY_PREFIX + "/file_suffix_supplier";
 
@@ -45,12 +50,12 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/content_type_consumer";
 
 
+    public static final String PROPERTY_CONTENT_TYPE_SUPPLIER
+        = PROPERTY_PREFIX + "/content_type_supplier";
+
+
     public static final String PROPERTY_CONTENT_LENGTH_CONSUMER
         = PROPERTY_PREFIX + "/content_length_consumer";
-
-
-    public static final String PROPERTY_CONTENT_TYPE_SUPPLIER
-        = PROPERTY_PREFIX + "/content_type_suppplier";
 
 
     public static final String PROPERTY_CONTENT_LENGTH_SUPPLIER

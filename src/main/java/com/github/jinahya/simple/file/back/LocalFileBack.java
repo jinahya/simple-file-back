@@ -27,6 +27,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.function.Supplier;
 import javax.inject.Inject;
@@ -45,6 +46,15 @@ public class LocalFileBack implements FileBack {
         = FileBackConstants.PROPERTY_PREFIX + "/local_file_back";
 
 
+    private static final String KEY_DIGEST_ALGORITHM = "SHA-1"; // 160 bits
+
+
+    private static final int PATH_TOKEN_LENGTH = 3;
+
+
+    private static final String PATH_TOKEN_DELIMITER = "/";
+
+
     static Path leafPath(final Path localRoot, final FileContext fileContext,
                          final boolean createParent)
         throws IOException, FileBackException {
@@ -58,7 +68,14 @@ public class LocalFileBack implements FileBack {
             throw new FileBackException("no keyBuffer supplied");
         }
 
-        String pathName = FileBackUtilities.keyBufferToPathName(keyBuffer);
+        String pathName = null;
+        try {
+            pathName = FileBackUtilities.keyBufferToPathName(
+                keyBuffer, KEY_DIGEST_ALGORITHM, PATH_TOKEN_LENGTH,
+                PATH_TOKEN_DELIMITER);
+        } catch (final NoSuchAlgorithmException nsae) {
+            throw new RuntimeException(nsae);
+        }
         final Supplier<String> fileSuffixSupplier
             = fileContext.fileSuffixSupplier();
         if (fileSuffixSupplier != null) {

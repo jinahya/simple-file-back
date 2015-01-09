@@ -31,33 +31,33 @@ public interface FileBack {
 
 
     /**
-     * Reads file content.
+     * Reads a file content.
      *
-     * @param context
+     * @param context the context.
      *
-     * @throws IOException
+     * @throws IOException if an I/O error occurs.
      * @throws FileBackException
      */
     void read(FileContext context) throws IOException, FileBackException;
 
 
     /**
-     * Updates file content.
+     * Updates a file content.
      *
-     * @param context
+     * @param context the context.
      *
-     * @throws IOException
+     * @throws IOException if an I/O error occurs.
      * @throws FileBackException
      */
     void update(FileContext context) throws IOException, FileBackException;
 
 
     /**
-     * Deletes file.
+     * Deletes a file.
      *
-     * @param context
+     * @param context the context.
      *
-     * @throws IOException
+     * @throws IOException if an I/O error occurs.
      * @throws FileBackException
      */
     void delete(FileContext context) throws IOException, FileBackException;
