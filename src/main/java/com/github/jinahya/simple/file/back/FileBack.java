@@ -31,9 +31,10 @@ public interface FileBack {
     public static enum FileOperation {
 
 
+        COPY,
+        DELETE,
         READ,
-        UPDATE,
-        DELETE
+        WRITE
 
 
     }

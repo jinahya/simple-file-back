@@ -18,6 +18,7 @@
 package com.github.jinahya.simple.file.back;
 
 
+import com.github.jinahya.simple.file.back.FileBack.FileOperation;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -37,6 +38,7 @@ public interface FileContext {
     public static enum PropertyKey {
 
 
+        FILE_OPERATION_SUPPLIER,
         KEY_BUFFER_SUPPLIER,
         PATH_NAME_CONSUMER,
         PATH_NAME_SUPPLIER,
@@ -53,7 +55,8 @@ public interface FileContext {
     Optional<Object> property(PropertyKey propertyKey);
 
 
-    default <T> Optional<T> property(final PropertyKey key, final Class<T> type) {
+    default <T> Optional<T> property(final PropertyKey key,
+                                     final Class<T> type) {
 
         if (type == null) {
             throw new NullPointerException("null type");
@@ -74,6 +77,25 @@ public interface FileContext {
         }
 
         return ofNullable(type.cast(property(key, value).orElse(null)));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<FileOperation> fileOperationSupplier() {
+
+        return (Supplier<FileOperation>) property(
+            PropertyKey.FILE_OPERATION_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<FileOperation> fileOperationSupplier(
+        final Supplier<FileOperation> fileOperationSupplier) {
+
+        return (Supplier<FileOperation>) property(
+            PropertyKey.FILE_OPERATION_SUPPLIER, fileOperationSupplier)
+            .orElse(null);
     }
 
 
