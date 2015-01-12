@@ -250,13 +250,13 @@ public class LocalFileBackTest {
         final ByteBuffer fileKey = randomFileKey();
         fileContext.targetKeySupplier(() -> fileKey);
 
-        final Path leafPath = LocalFileBack.leafPath(rootPath, fileKey, false);
+        final Path leafPath = LocalFileBack.leafPath(rootPath, fileKey, true);
 
         final byte[] fileBytes = randomFileBytes();
         final boolean fileWritten
             = Files.isRegularFile(leafPath) || current().nextBoolean();
         if (fileWritten) {
-            Files.write(leafPath, fileBytes, StandardOpenOption.CREATE,
+            Files.write(leafPath, fileBytes, StandardOpenOption.CREATE_NEW,
                         StandardOpenOption.WRITE);
             logger.debug("file written");
         }

@@ -149,7 +149,7 @@ public class LocalFileBack implements FileBack {
                 });
             });
         }
-        final Path sourceLeafPath = sourceLeafPath_[1];
+        final Path sourceLeafPath = sourceLeafPath_[0];
         ofNullable(fileContext.sourceObjectConsumer()).ifPresent(
             c -> c.accept(sourceLeafPath));
         if (sourceLeafPath == null) {
@@ -171,7 +171,7 @@ public class LocalFileBack implements FileBack {
                 });
             });
         }
-        final Path targetLeafPath = targetLeafPath_[1];
+        final Path targetLeafPath = targetLeafPath_[0];
         ofNullable(fileContext.targetObjectConsumer()).ifPresent(
             c -> c.accept(targetLeafPath));
         if (targetLeafPath == null) {
@@ -309,7 +309,7 @@ public class LocalFileBack implements FileBack {
                 });
             });
         }
-        final Path targetLeafPath = targetLeafPath_[1];
+        final Path targetLeafPath = targetLeafPath_[0];
         logger.debug("target leaf path: {}", targetLeafPath);
         ofNullable(fileContext.targetObjectConsumer()).ifPresent(
             c -> c.accept(targetLeafPath));
