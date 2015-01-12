@@ -44,7 +44,7 @@ public final class FileBackTests {
      *
      * @return a new random root path.
      */
-    public static Path randomLocalRoot() {
+    public static Path randomRootPath() {
 
         final File tempDir = Files.createTempDir();
         tempDir.deleteOnExit();
@@ -53,12 +53,21 @@ public final class FileBackTests {
     }
 
 
-    public static ByteBuffer randomKeyBuffer() {
+    public static ByteBuffer randomFileKey() {
 
         final byte[] keyBytes = new byte[current().nextInt(1, 128)];
         current().nextBytes(keyBytes);
 
         return ByteBuffer.wrap(keyBytes);
+    }
+
+
+    public static byte[] randomFileBytes() {
+
+        final byte[] fileBytes = new byte[current().nextInt(1, 1024)];
+        current().nextBytes(fileBytes);
+
+        return fileBytes;
     }
 
 
@@ -96,3 +105,4 @@ public final class FileBackTests {
 
 
 }
+

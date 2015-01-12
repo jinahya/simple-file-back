@@ -31,18 +31,15 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
-public class LocalRootModule extends AbstractModule {
-
-
-    private static final Logger logger = getLogger(lookup().lookupClass());
+public class RootPathModule extends AbstractModule {
 
 
     @Override
     protected void configure() {
 
         bind(Path.class)
-            .annotatedWith(LocalRootPath.class)
-            .toInstance(FileBackTests.randomLocalRoot());
+            .annotatedWith(RootPath.class)
+            .toInstance(FileBackTests.randomRootPath());
     }
 
 
@@ -62,6 +59,9 @@ public class LocalRootModule extends AbstractModule {
 
         return injectee;
     }
+
+
+    private transient final Logger logger = getLogger(lookup().lookupClass());
 
 
 }

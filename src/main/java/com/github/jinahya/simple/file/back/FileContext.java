@@ -39,14 +39,18 @@ public interface FileContext {
 
 
         FILE_OPERATION_SUPPLIER,
-        KEY_BUFFER_SUPPLIER,
         PATH_NAME_CONSUMER,
         PATH_NAME_SUPPLIER,
-        SOURCE_CHANNLE_CONSUMER,
-        SOURCE_KEY_BUFFER_SUPPLIER,
-        TARGET_KEY_BUFFER_SUPPLIER,
+        SOURCE_CHANNEL_CONSUMER,
+        SOURCE_CHANNEL_SUPPLIER,
+        SOURCE_COPIED_CONSUMER,
+        SOURCE_OBJECT_CONSUMER,
+        SOURCE_KEY_SUPPLIER,
+        TARGET_KEY_SUPPLIER,
         TARGET_CHANNEL_CONSUMER,
-        TARGET_OPERATION_SUPPLIER,
+        TARGET_CHANNEL_SUPPLIER,
+        TARGET_COPIED_CONSUMER,
+        TARGET_OBJECT_CONSUMER
 
 
     }
@@ -80,6 +84,22 @@ public interface FileContext {
     }
 
 
+//    @SuppressWarnings("unchecked")
+//    default Supplier<ByteBuffer> fileKeySupplier() {
+//
+//        return (Supplier<ByteBuffer>) property(PropertyKey.FILE_KEY_SUPPLIER)
+//            .orElse(null);
+//    }
+//
+//
+//    @SuppressWarnings("unchecked")
+//    default Supplier<ByteBuffer> fileKeySupplier(
+//        final Supplier<ByteBuffer> keyBufferSupplier) {
+//
+//        return (Supplier<ByteBuffer>) property(PropertyKey.FILE_KEY_SUPPLIER,
+//                                               keyBufferSupplier)
+//            .orElse(null);
+//    }
     @SuppressWarnings("unchecked")
     default Supplier<FileOperation> fileOperationSupplier() {
 
@@ -100,57 +120,6 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> keyBufferSupplier() {
-
-        return (Supplier<ByteBuffer>) property(PropertyKey.KEY_BUFFER_SUPPLIER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> keyBufferSupplier(
-        final Supplier<ByteBuffer> keyBufferSupplier) {
-
-        return (Supplier<ByteBuffer>) property(PropertyKey.KEY_BUFFER_SUPPLIER, keyBufferSupplier)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> sourceKeyBufferSupplier() {
-
-        return (Supplier<ByteBuffer>) property(PropertyKey.SOURCE_KEY_BUFFER_SUPPLIER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> sourceKeyBufferSupplier(
-        final Supplier<ByteBuffer> sourceKeyBuffferSupplier) {
-
-        return (Supplier<ByteBuffer>) property(PropertyKey.SOURCE_KEY_BUFFER_SUPPLIER, sourceKeyBuffferSupplier)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> targetKeyBufferSupplier() {
-
-        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_BUFFER_SUPPLIER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> targetKeyBufferSupplier(
-        final Supplier<ByteBuffer> targetKeyBytesSupplier) {
-
-        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_BUFFER_SUPPLIER, targetKeyBytesSupplier)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
     default Consumer<String> pathNameConsumer() {
 
         return (Consumer<String>) property(PropertyKey.PATH_NAME_CONSUMER)
@@ -162,7 +131,8 @@ public interface FileContext {
     default Consumer<String> pathNameConsumer(
         final Consumer<String> pathNameConsumer) {
 
-        return (Consumer<String>) property(PropertyKey.PATH_NAME_CONSUMER, pathNameConsumer)
+        return (Consumer<String>) property(PropertyKey.PATH_NAME_CONSUMER,
+                                           pathNameConsumer)
             .orElse(null);
     }
 
@@ -179,7 +149,8 @@ public interface FileContext {
     default Supplier<String> pathNameSupplier(
         final Supplier<String> pathNameSupplier) {
 
-        return (Supplier<String>) property(PropertyKey.PATH_NAME_SUPPLIER, pathNameSupplier)
+        return (Supplier<String>) property(PropertyKey.PATH_NAME_SUPPLIER,
+                                           pathNameSupplier)
             .orElse(null);
     }
 
@@ -187,7 +158,8 @@ public interface FileContext {
     @SuppressWarnings("unchecked")
     default Consumer<ReadableByteChannel> sourceChannelConsumer() {
 
-        return (Consumer<ReadableByteChannel>) property(PropertyKey.SOURCE_CHANNLE_CONSUMER)
+        return (Consumer<ReadableByteChannel>) property(
+            PropertyKey.SOURCE_CHANNEL_CONSUMER)
             .orElse(null);
     }
 
@@ -196,7 +168,117 @@ public interface FileContext {
     default Consumer<ReadableByteChannel> sourceChannelConsumer(
         final Consumer<ReadableByteChannel> sourceChannelConsumer) {
 
-        return (Consumer<ReadableByteChannel>) property(PropertyKey.SOURCE_CHANNLE_CONSUMER, sourceChannelConsumer)
+        return (Consumer<ReadableByteChannel>) property(
+            PropertyKey.SOURCE_CHANNEL_CONSUMER, sourceChannelConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ReadableByteChannel> sourceChannelSupplier() {
+
+        return (Supplier<ReadableByteChannel>) property(
+            PropertyKey.SOURCE_CHANNEL_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ReadableByteChannel> sourceChannelSupplier(
+        final Supplier<ReadableByteChannel> sourceChannelSuppleir) {
+
+        return (Supplier<ReadableByteChannel>) property(
+            PropertyKey.SOURCE_CHANNEL_SUPPLIER, sourceChannelSuppleir)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> sourceCopiedConsumer() {
+
+        return (Consumer<Long>) property(PropertyKey.SOURCE_COPIED_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> sourceCopiedConsumer(
+        final Consumer<Long> sourceCopiedConsumer) {
+
+        return (Consumer<Long>) property(PropertyKey.SOURCE_COPIED_CONSUMER,
+                                         sourceCopiedConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> sourceKeySupplier() {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.SOURCE_KEY_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> sourceKeySupplier(
+        final Supplier<ByteBuffer> sourceKeySupplier) {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.SOURCE_KEY_SUPPLIER,
+                                               sourceKeySupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Object> sourceObjectConsumer() {
+
+        return (Consumer<Object>) property(PropertyKey.SOURCE_OBJECT_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Object> sourceObjectConsumer(
+        final Consumer<Object> sourceObjectConsumer) {
+
+        return (Consumer<Object>) property(PropertyKey.SOURCE_OBJECT_CONSUMER,
+                                           sourceObjectConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> targetCopiedConsumer() {
+
+        return (Consumer<Long>) property(PropertyKey.TARGET_COPIED_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> targetCopiedConsumer(
+        final Consumer<Long> targetCopiedConsumer) {
+
+        return (Consumer<Long>) property(PropertyKey.TARGET_COPIED_CONSUMER,
+                                         targetCopiedConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> targetKeySupplier() {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> targetKeySupplier(
+        final Supplier<ByteBuffer> targetKeySupplier) {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_SUPPLIER,
+                                               targetKeySupplier)
             .orElse(null);
     }
 
@@ -204,7 +286,8 @@ public interface FileContext {
     @SuppressWarnings("unchecked")
     default Consumer<WritableByteChannel> targetChannelConsumer() {
 
-        return (Consumer<WritableByteChannel>) property(PropertyKey.TARGET_CHANNEL_CONSUMER)
+        return (Consumer<WritableByteChannel>) property(
+            PropertyKey.TARGET_CHANNEL_CONSUMER)
             .orElse(null);
     }
 
@@ -213,7 +296,45 @@ public interface FileContext {
     default Consumer<WritableByteChannel> targetChannelConsumer(
         final Consumer<WritableByteChannel> targetChannelConsumer) {
 
-        return (Consumer<WritableByteChannel>) property(PropertyKey.TARGET_CHANNEL_CONSUMER, targetChannelConsumer)
+        return (Consumer<WritableByteChannel>) property(
+            PropertyKey.TARGET_CHANNEL_CONSUMER, targetChannelConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<WritableByteChannel> targetChannelSupplier() {
+
+        return (Supplier<WritableByteChannel>) property(
+            PropertyKey.TARGET_CHANNEL_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<WritableByteChannel> targetChannelSupplier(
+        final Supplier<WritableByteChannel> targetChannelSupplier) {
+
+        return (Supplier<WritableByteChannel>) property(
+            PropertyKey.TARGET_CHANNEL_SUPPLIER, targetChannelSupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Object> targetObjectConsumer() {
+
+        return (Consumer<Object>) property(PropertyKey.TARGET_OBJECT_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Object> targetObjectConsumer(
+        final Consumer<Object> targetObjectConsumer) {
+
+        return (Consumer<Object>) property(PropertyKey.TARGET_OBJECT_CONSUMER,
+                                           targetObjectConsumer)
             .orElse(null);
     }
 

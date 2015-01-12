@@ -18,26 +18,30 @@
 package com.github.jinahya.simple.file.back;
 
 
-import java.lang.annotation.Documented;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.ElementType.TYPE;
-import java.lang.annotation.Retention;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.Target;
-import javax.inject.Qualifier;
+import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
+import static java.lang.invoke.MethodHandles.lookup;
+import org.slf4j.Logger;
+import static org.slf4j.LoggerFactory.getLogger;
 
 
 /**
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
-@Documented
-@Retention(RUNTIME)
-@Target({FIELD, METHOD, PARAMETER, TYPE})
-@Qualifier
-public @interface LocalRootPath {
+public class FileBackModule extends AbstractModule {
+
+
+    @Override
+    protected void configure() {
+
+        bind(FileBack.class)
+            .annotatedWith(Names.named("local"))
+            .to(LocalFileBack.class);
+    }
+
+
+    private transient final Logger logger = getLogger(lookup().lookupClass());
 
 
 }
