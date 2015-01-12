@@ -27,16 +27,39 @@ import java.io.IOException;
 public interface FileBack {
 
 
-    @Deprecated
-    void create(FileContext context) throws IOException, FileBackException;
+    void locate(FileContext context) throws IOException, FileBackException;
 
 
+    /**
+     * Reads a file content.
+     *
+     * @param context the context.
+     *
+     * @throws IOException if an I/O error occurs.
+     * @throws FileBackException
+     */
     void read(FileContext context) throws IOException, FileBackException;
 
 
-    void write(FileContext context) throws IOException, FileBackException;
+    /**
+     * Updates a file content.
+     *
+     * @param context the context.
+     *
+     * @throws IOException if an I/O error occurs.
+     * @throws FileBackException
+     */
+    void update(FileContext context) throws IOException, FileBackException;
 
 
+    /**
+     * Deletes a file.
+     *
+     * @param context the context.
+     *
+     * @throws IOException if an I/O error occurs.
+     * @throws FileBackException
+     */
     void delete(FileContext context) throws IOException, FileBackException;
 
 

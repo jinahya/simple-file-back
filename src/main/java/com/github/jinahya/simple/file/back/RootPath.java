@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package com.github.jinahya.simple.file.back;
 
 
@@ -30,7 +32,7 @@ import javax.inject.Qualifier;
  */
 @Documented
 @Retention(RUNTIME)
-@Target({FIELD, PARAMETER, METHOD})
+@Target({FIELD, METHOD, PARAMETER, TYPE})
 @Qualifier
 public @interface RootPath {
 

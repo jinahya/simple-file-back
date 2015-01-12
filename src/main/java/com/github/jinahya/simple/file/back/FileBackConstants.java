@@ -19,6 +19,7 @@ package com.github.jinahya.simple.file.back;
 
 
 /**
+ * Constants for file back.
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
@@ -29,20 +30,32 @@ public final class FileBackConstants {
         = "http://www.github.com/jinahya/simple-file-back";
 
 
+    public static final String PROPERTY_FILE_BACK_SUPPLIER
+        = PROPERTY_PREFIX + "/file_back_supplier";
+
+
     public static final String PROPERTY_KEY_BUFFER_SUPPLIER
         = PROPERTY_PREFIX + "/key_buffer_supplier";
+
+
+    public static final String PROPERTY_FILE_SUFFIX_CONSUMER
+        = PROPERTY_PREFIX + "/file_suffix_consumer";
+
+
+    public static final String PROPERTY_FILE_SUFFIX_SUPPLIER
+        = PROPERTY_PREFIX + "/file_suffix_supplier";
 
 
     public static final String PROPERTY_CONTENT_TYPE_CONSUMER
         = PROPERTY_PREFIX + "/content_type_consumer";
 
 
+    public static final String PROPERTY_CONTENT_TYPE_SUPPLIER
+        = PROPERTY_PREFIX + "/content_type_supplier";
+
+
     public static final String PROPERTY_CONTENT_LENGTH_CONSUMER
         = PROPERTY_PREFIX + "/content_length_consumer";
-
-
-    public static final String PROPERTY_CONTENT_TYPE_SUPPLIER
-        = PROPERTY_PREFIX + "/content_type_suppplier";
 
 
     public static final String PROPERTY_CONTENT_LENGTH_SUPPLIER
@@ -53,24 +66,28 @@ public final class FileBackConstants {
         = PROPERTY_PREFIX + "/source_channel_supplier";
 
 
+    public static final String PROPERTY_SOURCE_COPIED_CONSUMER
+        = PROPERTY_PREFIX + "/source_copied_consumer";
+
+
     public static final String PROPERTY_TARGET_CHANNEL_SUPPLIER
         = PROPERTY_PREFIX + "/target_channel_supplier";
+
+
+    public static final String PROPERTY_TARGET_COPIED_CONSUMER
+        = PROPERTY_PREFIX + "/target_copied_consumer";
 
 
     public static final String PROPERTY_PATH_NAME_CONSUMER
         = PROPERTY_PREFIX + "/path_name_consumer";
 
 
-    public static final String PROPERTY_LOCAL_PATH_SUPPLIER
-        = PROPERTY_PREFIX + "/local_path_supplier";
+    public static final String PROPERTY_PATH_NAME_SUPPLIER
+        = PROPERTY_PREFIX + "/path_name_supplier";
 
 
-    public static final String PROPERTY_LOCAL_PATH_CONSUMER
-        = PROPERTY_PREFIX + "/local_path_consumer";
-
-
-    public static final String PROPERTY_BYTES_COPIED_CONSUMER
-        = PROPERTY_PREFIX + "/bytes_copied_consumer";
+    public static final String PROPERTY_FILE_DELETED_CONSUMER
+        = PROPERTY_PREFIX + "/file_deleted_consumer";
 
 
     private FileBackConstants() {

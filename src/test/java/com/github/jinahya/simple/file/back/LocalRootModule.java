@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package com.github.jinahya.simple.file.back;
 
 
@@ -29,7 +31,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
-public class RootPathModule extends AbstractModule {
+public class LocalRootModule extends AbstractModule {
 
 
     private static final Logger logger = getLogger(lookup().lookupClass());
@@ -40,7 +42,7 @@ public class RootPathModule extends AbstractModule {
 
         bind(Path.class)
             .annotatedWith(RootPath.class)
-            .toInstance(FileBackTests.randomRootPath());
+            .toInstance(FileBackTests.randomLocalRoot());
     }
 
 

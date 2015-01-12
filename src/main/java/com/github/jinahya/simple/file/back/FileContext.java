@@ -18,21 +18,15 @@
 package com.github.jinahya.simple.file.back;
 
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.LongConsumer;
-import java.util.function.LongSupplier;
 import java.util.function.Supplier;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 
 
 /**
@@ -115,6 +109,25 @@ public interface FileContext {
     }
 
 
+    @SuppressWarnings("unchecked")
+    default Supplier<FileBack> fileBackSupplier() {
+
+        return (Supplier<FileBack>) property(
+            FileBackConstants.PROPERTY_FILE_BACK_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<FileBack> fileBackSupplier(
+        final Supplier<FileBack> fileBackSupplier) {
+
+        return (Supplier<FileBack>) property(
+            FileBackConstants.PROPERTY_FILE_BACK_SUPPLIER, fileBackSupplier)
+            .orElse(null);
+    }
+
+
     /**
      * Returns the current property value mapped to
      * {@link FileBackConstants#PROPERTY_KEY_BUFFER_SUPPLIER}.
@@ -137,6 +150,25 @@ public interface FileContext {
 
         return (Supplier<ByteBuffer>) property(
             FileBackConstants.PROPERTY_KEY_BUFFER_SUPPLIER, keyBytesSupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> fileSuffixSupplier() {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_FILE_SUFFIX_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> fileSuffixSupplier(
+        final Supplier<String> fileSuffixSupplier) {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_FILE_SUFFIX_SUPPLIER, fileSuffixSupplier)
             .orElse(null);
     }
 
@@ -214,36 +246,40 @@ public interface FileContext {
     }
 
 
-    default LongConsumer contentLengthConsumer() {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> contentLengthConsumer() {
 
-        return (LongConsumer) property(
+        return (Consumer<Long>) property(
             FileBackConstants.PROPERTY_CONTENT_LENGTH_CONSUMER)
             .orElse(null);
     }
 
 
-    default LongConsumer contentLengthConsumer(
-        final LongConsumer contentLengthConsumer) {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> contentLengthConsumer(
+        final Consumer<Long> contentLengthConsumer) {
 
-        return (LongConsumer) property(
+        return (Consumer<Long>) property(
             FileBackConstants.PROPERTY_CONTENT_LENGTH_CONSUMER,
             contentLengthConsumer)
             .orElse(null);
     }
 
 
-    default LongSupplier contentLengthSupplier() {
+    @SuppressWarnings("unchecked")
+    default Supplier<Long> contentLengthSupplier() {
 
-        return (LongSupplier) property(
+        return (Supplier<Long>) property(
             FileBackConstants.PROPERTY_CONTENT_LENGTH_SUPPLIER)
             .orElse(null);
     }
 
 
-    default LongSupplier contentLengthSupplier(
-        final LongSupplier contentLengthSupplier) {
+    @SuppressWarnings("unchecked")
+    default Supplier<Long> contentLengthSupplier(
+        final Supplier<Long> contentLengthSupplier) {
 
-        return (LongSupplier) property(
+        return (Supplier<Long>) property(
             FileBackConstants.PROPERTY_CONTENT_LENGTH_SUPPLIER,
             contentLengthSupplier)
             .orElse(null);
@@ -251,20 +287,21 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
-    default Consumer<Path> localPathConsumer() {
+    default Consumer<Boolean> fileDeletedConsumer() {
 
-        return (Consumer<Path>) property(
-            FileBackConstants.PROPERTY_LOCAL_PATH_CONSUMER)
+        return (Consumer<Boolean>) property(
+            FileBackConstants.PROPERTY_FILE_DELETED_CONSUMER)
             .orElse(null);
     }
 
 
     @SuppressWarnings("unchecked")
-    default Consumer<Path> localPathConsumer(
-        final Consumer<Path> localPathConsumer) {
+    default Consumer<Boolean> fileDeletedConsumer(
+        final Consumer<Boolean> fileDeletedConsumer) {
 
-        return (Consumer<Path>) property(
-            FileBackConstants.PROPERTY_LOCAL_PATH_CONSUMER, localPathConsumer)
+        return (Consumer<Boolean>) property(
+            FileBackConstants.PROPERTY_FILE_DELETED_CONSUMER,
+            fileDeletedConsumer)
             .orElse(null);
     }
 
@@ -284,6 +321,25 @@ public interface FileContext {
 
         return (Consumer<String>) property(
             FileBackConstants.PROPERTY_PATH_NAME_CONSUMER, pathNameConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> pathNameSupplier() {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_PATH_NAME_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> pathNameSupplier(
+        final Supplier<String> pathNameSupplier) {
+
+        return (Supplier<String>) property(
+            FileBackConstants.PROPERTY_PATH_NAME_SUPPLIER, pathNameSupplier)
             .orElse(null);
     }
 
@@ -344,30 +400,6 @@ public interface FileContext {
     }
 
 
-    /**
-     *
-     * @param servletRequest
-     *
-     * @return
-     *
-     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
-     * }
-     */
-    @Deprecated
-    default Supplier<ReadableByteChannel> sourceChannelSupplier(
-        final ServletRequest servletRequest) {
-
-        return sourceChannelSupplier(
-            servletRequest == null ? null : () -> {
-                try {
-                    return Channels.newChannel(servletRequest.getInputStream());
-                } catch (final IOException ioe) {
-                    throw new RuntimeException(ioe);
-                }
-            });
-    }
-
-
     @SuppressWarnings("unchecked")
     default Supplier<WritableByteChannel> targetChannelSupplier() {
 
@@ -388,60 +420,42 @@ public interface FileContext {
     }
 
 
-    /**
-     *
-     * @param servletResponse
-     *
-     * @return
-     *
-     * @deprecated Use {@link #targetChannelSupplier(java.util.function.Supplier)
-     * }
-     */
-    @Deprecated
-    default Supplier<WritableByteChannel> targetChannelSupplier(
-        final ServletResponse servletResponse) {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> sourceCopiedConsumer() {
 
-        return targetChannelSupplier(servletResponse == null ? null : () -> {
-            try {
-                return Channels.newChannel(servletResponse.getOutputStream());
-            } catch (final IOException ioe) {
-                throw new RuntimeException(ioe);
-            }
-        });
-    }
-
-
-    /**
-     * Returns the consumer mapped to
-     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER}.
-     *
-     * @return the property value mapped to
-     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER} or {@code null}
-     * if no mappings found
-     */
-    default LongConsumer bytesCopiedConsumer() {
-
-        return (LongConsumer) property(
-            FileBackConstants.PROPERTY_BYTES_COPIED_CONSUMER)
+        return (Consumer<Long>) property(
+            FileBackConstants.PROPERTY_SOURCE_COPIED_CONSUMER)
             .orElse(null);
     }
 
 
-    /**
-     * Sets a consumer for
-     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER}.
-     *
-     * @param bytesCopiedConsumer new value; {@code null} for deletion.
-     *
-     * @return the previous value mapped to
-     * {@link FileBackConstants#PROPERTY_BYTES_COPIED_CONSUMER}.
-     */
-    default LongConsumer bytesCopiedConsumer(
-        final LongConsumer bytesCopiedConsumer) {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> sourceCopiedConsumer(
+        final Consumer<Long> sourceCopiedConsumer) {
 
-        return (LongConsumer) property(
-            FileBackConstants.PROPERTY_BYTES_COPIED_CONSUMER,
-            bytesCopiedConsumer)
+        return (Consumer<Long>) property(
+            FileBackConstants.PROPERTY_SOURCE_COPIED_CONSUMER,
+            sourceCopiedConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> targetCopiedConsumer() {
+
+        return (Consumer<Long>) property(
+            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> targetCopiedConsumer(
+        final Consumer<Long> targetCopiedConsumer) {
+
+        return (Consumer<Long>) property(
+            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER,
+            targetCopiedConsumer)
             .orElse(null);
     }
 

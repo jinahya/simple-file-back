@@ -56,15 +56,15 @@ public class DefaultFileContext implements FileContext {
 
     protected Map<String, Object> properties() {
 
-        if (properties_ == null) {
-            properties_ = new HashMap<>();
+        if (properties == null) {
+            properties = new HashMap<>();
         }
 
-        return properties_;
+        return properties;
     }
 
 
-    private Map<String, Object> properties_;
+    private Map<String, Object> properties;
 
 
 }

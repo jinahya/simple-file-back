@@ -44,7 +44,7 @@ public final class FileBackTests {
      *
      * @return a new random root path.
      */
-    public static Path randomRootPath() {
+    public static Path randomLocalRoot() {
 
         final File tempDir = Files.createTempDir();
         tempDir.deleteOnExit();

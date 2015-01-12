@@ -27,13 +27,9 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Formatter;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -50,89 +46,104 @@ public class LocalFileBack implements FileBack {
         = FileBackConstants.PROPERTY_PREFIX + "/local_file_back";
 
 
-    public static final String DIGEST_ALGORITHM = "SHA-1"; // 160 bits
+    private static final String KEY_DIGEST_ALGORITHM = "SHA-1"; // 160 bits
 
 
-//    public static final Function<byte[], String> IDENTIFIER_FUNCTION
-//        = FileBackConstants.IDENTIFIER_ENCODER_HEX;
-    /**
-     * The fixed token length for splitting identifiers.
-     */
-    public static final int TOKEN_LENGTH = 3;
+    private static final int PATH_TOKEN_LENGTH = 3;
 
 
-    static Path localPath(final Path rootPath, final FileContext fileContext,
-                          final boolean createParent)
+    private static final String PATH_TOKEN_DELIMITER = "/";
+
+
+    static Path leafPath(final Path localRoot, final FileContext fileContext,
+                         final boolean createParent)
         throws IOException, FileBackException {
 
         final Logger logger = getLogger(lookup().lookupClass());
 
-
-        final byte[] digestedBytes;
-        {
-            final ByteBuffer keyBuffer = Optional.ofNullable(
-                fileContext.keyBufferSupplier()).orElse(() -> null).get();
-            logger.debug("keyBuffer: {}", keyBuffer);
-            if (keyBuffer == null) {
-                throw new FileBackException("no keyBuffer supplied");
-            }
-            try {
-                final MessageDigest digest
-                    = MessageDigest.getInstance(DIGEST_ALGORITHM);
-                digest.update(keyBuffer.asReadOnlyBuffer());
-                digestedBytes = digest.digest();
-            } catch (final NoSuchAlgorithmException nsae) {
-                throw new RuntimeException(nsae);
-            }
+        final ByteBuffer keyBuffer = Optional.ofNullable(
+            fileContext.keyBufferSupplier()).orElse(() -> null).get();
+        logger.debug("keyBuffer: {}", keyBuffer);
+        if (keyBuffer == null) {
+            throw new FileBackException("no keyBuffer supplied");
         }
 
-        final String hexadecimalized
-            = IntStream.range(0, digestedBytes.length)
-            .collect(() -> new StringBuilder(digestedBytes.length * 2),
-                     (b, i) -> new Formatter(b).format(
-                         "%02x", digestedBytes[i] & 0xFF),
-                     StringBuilder::append).toString();
-        logger.debug("hexadecimalized: {}", hexadecimalized);
-
-        final String joined = Stream.of(
-            hexadecimalized.split("(?<=\\G.{" + TOKEN_LENGTH + "})"))
-            .collect(Collectors.joining("/"));
-        final String pathName = "/" + joined;
+        String pathName = null;
+        try {
+            pathName = FileBackUtilities.keyBufferToPathName(
+                keyBuffer, KEY_DIGEST_ALGORITHM, PATH_TOKEN_LENGTH,
+                PATH_TOKEN_DELIMITER);
+        } catch (final NoSuchAlgorithmException nsae) {
+            throw new RuntimeException(nsae);
+        }
+        final Supplier<String> fileSuffixSupplier
+            = fileContext.fileSuffixSupplier();
+        if (fileSuffixSupplier != null) {
+            final String fileSuffix = fileSuffixSupplier.get();
+            if (fileSuffix != null) {
+                pathName += "." + fileSuffix.trim();
+            }
+        }
         logger.debug("pathName: {}", pathName);
         Optional.ofNullable(fileContext.pathNameConsumer()).orElse(v -> {
         }).accept(pathName);
 
-        final Path localPath = rootPath.resolve(
-            joined.replace("/", rootPath.getFileSystem().getSeparator()));
-        logger.debug("localPath: {}", localPath);
-        Optional.ofNullable(fileContext.localPathConsumer()).orElse(v -> {
-        }).accept(localPath);
+        final Path leafPath = localRoot.resolve(
+            pathName.replace("/", localRoot.getFileSystem().getSeparator()));
+        logger.debug("leafPath: {}", leafPath);
 
         if (createParent) {
-            final Path parent = localPath.getParent();
+            final Path parent = leafPath.getParent();
             if (!Files.isDirectory(parent)) {
                 Files.createDirectories(parent);
                 logger.debug("parent created: {}", parent);
             }
         }
 
-        return localPath;
-    }
-
-
-    public LocalFileBack() {
-
-        super();
-
-        logger = getLogger(getClass());
+        return leafPath;
     }
 
 
     @Override
-    public void create(final FileContext fileContext)
+    public void locate(final FileContext fileContext)
         throws IOException, FileBackException {
 
-        throw new UnsupportedOperationException("not supported: create");
+        if (fileContext == null) {
+            throw new NullPointerException("null fileContext");
+        }
+
+        String pathName = Optional.ofNullable(fileContext.pathNameSupplier())
+            .orElse(() -> null).get();
+        logger.debug("pathName: {}", pathName);
+        if (pathName == null) {
+            throw new FileBackException("no pathName supplied");
+        }
+
+        final Path leafPath = rootPath.resolve(pathName);
+        logger.debug("leafPath: {}", leafPath);
+        logger.debug("leafPath.regularFile: {}", Files.isRegularFile(leafPath));
+        logger.debug("leafPath.readable: {}", Files.isReadable(leafPath));
+
+        if (!Files.isRegularFile(leafPath) || !Files.isReadable(leafPath)) {
+            Optional.ofNullable(fileContext.targetCopiedConsumer())
+                .ifPresent(c -> c.accept(null));
+            return;
+        }
+
+        final WritableByteChannel targetChannel = Optional
+            .ofNullable(fileContext.targetChannelSupplier())
+            .orElseThrow(
+                () -> new FileBackException("no targetChannelSupplier"))
+            .get();
+        logger.debug("targetChannel: {}", targetChannel);
+        if (targetChannel == null) {
+            throw new FileBackException("null targetChannel supplied");
+        }
+        final long targetCopied = Files.copy(
+            leafPath, Channels.newOutputStream(targetChannel));
+        logger.debug("targetCopied: {}", targetCopied);
+        Optional.ofNullable(fileContext.targetCopiedConsumer())
+            .ifPresent(c -> c.accept(targetCopied));
     }
 
 
@@ -144,50 +155,58 @@ public class LocalFileBack implements FileBack {
             throw new NullPointerException("null fileContext");
         }
 
-        final Path localPath = localPath(rootPath, fileContext, false);
-        if (!Files.isReadable(localPath)) {
-            logger.error("localPath is not readable: {}", localPath);
+        final Path leafPath = leafPath(rootPath, fileContext, false);
+
+        if (!Files.isReadable(leafPath)) {
+            logger.error("leafPath is not readable: {}", leafPath);
+            Optional.ofNullable(fileContext.targetCopiedConsumer())
+                .ifPresent(c -> c.accept(null));
             return;
         }
 
-        final WritableByteChannel targetChannel = Optional.ofNullable(
-            fileContext.targetChannelSupplier()).orElse(() -> null).get();
+        final WritableByteChannel targetChannel = Optional
+            .ofNullable(fileContext.targetChannelSupplier())
+            .orElseThrow(
+                () -> new FileBackException("no targetChannelSupplier"))
+            .get();
         logger.debug("targetChannel: {}", targetChannel);
         if (targetChannel == null) {
-            throw new FileBackException("no targetChannel supplied");
+            throw new FileBackException("null targetChannel supplied");
         }
-
-        final long bytesCopied = Files.copy(
-            localPath, Channels.newOutputStream(targetChannel));
-        logger.debug("bytesCopied: {}", bytesCopied);
-        Optional.ofNullable(fileContext.bytesCopiedConsumer()).orElse(v -> {
-        }).accept(bytesCopied);
+        final long targetCopied = Files.copy(
+            leafPath, Channels.newOutputStream(targetChannel));
+        logger.debug("targetCopied: {}", targetCopied);
+        Optional.ofNullable(fileContext.targetCopiedConsumer())
+            .ifPresent(c -> c.accept(targetCopied));
     }
 
 
     @Override
-    public void write(final FileContext fileContext)
+    public void update(final FileContext fileContext)
         throws IOException, FileBackException {
 
         if (fileContext == null) {
             throw new NullPointerException("null fileContext");
         }
 
-        final Path localPath = localPath(rootPath, fileContext, true);
+        final Path leafPath = leafPath(rootPath, fileContext, true);
 
-        final ReadableByteChannel sourceChannel = Optional.ofNullable(
-            fileContext.sourceChannelSupplier()).orElse(() -> null).get();
+        final ReadableByteChannel sourceChannel = Optional
+            .ofNullable(fileContext.sourceChannelSupplier())
+            .orElseThrow(
+                () -> new FileBackException("no sourceChannelSupplier"))
+            .get();
         logger.debug("sourceChannel: {}", sourceChannel);
         if (sourceChannel == null) {
-            throw new FileBackException("no sourceChannel supplied");
+            throw new FileBackException("null sourceChannel supplied");
         }
 
-        final long bytesCopied = Files.copy(
-            Channels.newInputStream(sourceChannel), localPath,
+        final long sourceCopied = Files.copy(
+            Channels.newInputStream(sourceChannel), leafPath,
             StandardCopyOption.REPLACE_EXISTING);
-        logger.debug("bytesCopied: {}", bytesCopied);
-        Optional.ofNullable(fileContext.bytesCopiedConsumer()).orElse(v -> {
-        }).accept(bytesCopied);
+        logger.debug("sourceCopied: {}", sourceCopied);
+        Optional.ofNullable(fileContext.sourceCopiedConsumer())
+            .ifPresent(c -> c.accept(sourceCopied));
     }
 
 
@@ -199,14 +218,18 @@ public class LocalFileBack implements FileBack {
             throw new NullPointerException("null fileContext");
         }
 
-        final Path localPath = localPath(rootPath, fileContext, false);
+        final Path leafPath = leafPath(rootPath, fileContext, false);
+        logger.debug("leafPath: {}", leafPath);
 
-        final boolean deleted = Files.deleteIfExists(localPath);
-        logger.debug("deleted: {}", deleted);
+        final boolean fileDeleted = Files.deleteIfExists(leafPath);
+        logger.debug("fileDeleted: {}", fileDeleted);
+
+        Optional.ofNullable(fileContext.fileDeletedConsumer())
+            .ifPresent(c -> c.accept(fileDeleted));
     }
 
 
-    private final transient Logger logger;
+    private transient final Logger logger = getLogger(getClass());
 
 
     @Inject
