@@ -33,6 +33,8 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
+import java.util.stream.StreamSupport;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -78,14 +80,15 @@ public class LocalFileBack implements FileBack {
         if (createParent) {
             final Path parent = leafPath.getParent();
             logger.debug("parent: {}", parent);
+            logger.debug("parent.directory: {}", Files.isDirectory(parent));
             if (!Files.isDirectory(parent)) {
                 try {
-                    Files.createDirectories(parent);
-                    logger.debug("parent created");
-                } catch (final IOException ioe) {
+                    final Path created = Files.createDirectories(parent);
+                    logger.debug("parent created: {}", created);
+                } catch (Exception e) {
                     logger.error("failed to create parent directory: " + parent,
-                                 ioe);
-                    throw new RuntimeException(ioe);
+                                 e);
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -136,6 +139,8 @@ public class LocalFileBack implements FileBack {
     public void copy(final FileContext fileContext)
         throws IOException, FileBackException {
 
+        logger.debug("copy({})", fileContext);
+
         if (fileContext == null) {
             throw new NullPointerException("null fileContext");
         }
@@ -150,6 +155,7 @@ public class LocalFileBack implements FileBack {
             });
         }
         final Path sourceLeafPath = sourceLeafPath_[0];
+        logger.debug("source leaf path: {}", sourceLeafPath);
         ofNullable(fileContext.sourceObjectConsumer()).ifPresent(
             c -> c.accept(sourceLeafPath));
         if (sourceLeafPath == null) {
@@ -172,19 +178,30 @@ public class LocalFileBack implements FileBack {
             });
         }
         final Path targetLeafPath = targetLeafPath_[0];
+        logger.debug("target leaf path: {}", targetLeafPath);
         ofNullable(fileContext.targetObjectConsumer()).ifPresent(
             c -> c.accept(targetLeafPath));
         if (targetLeafPath == null) {
             logger.error("no target leaf path located");
             return;
         }
-        if (!Files.isWritable(targetLeafPath)) {
-            logger.warn("target leaf path is not writable: {}", targetLeafPath);
+
+        if (sourceLeafPath.equals(targetLeafPath)) {
+            logger.error("source leaf path == target leaf path");
             return;
         }
 
         Files.copy(sourceLeafPath, targetLeafPath,
                    StandardCopyOption.REPLACE_EXISTING);
+        logger.debug("file copied");
+
+        final String pathName = StreamSupport
+            .stream(((Iterable<Path>) () -> rootPath.relativize(targetLeafPath)
+                     .iterator()).spliterator(), false)
+            .map(Path::toString).collect(joining("/"));
+        logger.debug("path name: {}", pathName);
+        ofNullable(fileContext.pathNameConsumer()).ifPresent(
+            c -> c.accept(pathName));
 
         ofNullable(fileContext.sourceCopiedConsumer()).ifPresent(
             c -> c.accept(sourceLeafPath.toFile().length()));
@@ -261,8 +278,22 @@ public class LocalFileBack implements FileBack {
             logger.warn("no source leaf path located");
             return;
         }
+        if (!Files.isRegularFile(sourceLeafPath)) {
+            logger.warn("source leaf path is not a regular file: {}",
+                        sourceLeafPath);
+            return;
+        }
+
+        final String pathName = StreamSupport
+            .stream(((Iterable<Path>) () -> rootPath.relativize(sourceLeafPath)
+                     .iterator()).spliterator(), false)
+            .map(Path::toString).collect(joining("/"));
+        logger.debug("path name: {}", pathName);
+        ofNullable(fileContext.pathNameConsumer()).ifPresent(
+            c -> c.accept(pathName));
 
         ofNullable(fileContext.sourceChannelConsumer()).ifPresent(c -> {
+            logger.debug("source channel consumer presents");
             try {
                 try (ReadableByteChannel sourceChannel = newByteChannel(
                     sourceLeafPath, StandardOpenOption.READ)) {
@@ -275,6 +306,7 @@ public class LocalFileBack implements FileBack {
         });
 
         ofNullable(fileContext.targetChannelSupplier()).ifPresent(s -> {
+            logger.debug("target channel supplier presents");
             final WritableByteChannel targetChannel = s.get();
             logger.debug("target channel: {}", targetChannel);
             try {
@@ -318,7 +350,16 @@ public class LocalFileBack implements FileBack {
             return;
         }
 
+        final String pathName = StreamSupport
+            .stream(((Iterable<Path>) () -> rootPath.relativize(targetLeafPath)
+                     .iterator()).spliterator(), false)
+            .map(Path::toString).collect(joining("/"));
+        logger.debug("path name: {}", pathName);
+        ofNullable(fileContext.pathNameConsumer()).ifPresent(
+            c -> c.accept(pathName));
+
         ofNullable(fileContext.targetChannelConsumer()).ifPresent(c -> {
+            logger.debug("target channel consumer presents");
             try {
                 try (FileChannel targetChannel = FileChannel.open(
                     targetLeafPath, StandardOpenOption.CREATE,
@@ -333,6 +374,7 @@ public class LocalFileBack implements FileBack {
         });
 
         ofNullable(fileContext.sourceChannelSupplier()).ifPresent(s -> {
+            logger.debug("source channel supplier presents");
             final ReadableByteChannel sourceChannel = s.get();
             logger.debug("target channel: {}", sourceChannel);
             try {
