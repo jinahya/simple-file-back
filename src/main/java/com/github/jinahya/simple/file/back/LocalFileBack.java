@@ -71,16 +71,15 @@ public class LocalFileBack implements FileBack {
         } catch (final NoSuchAlgorithmException nsae) {
             throw new RuntimeException(nsae);
         }
-        logger.debug("pathName: {}", pathName);
+        logger.debug("path name: {}", pathName);
 
         final Path leafPath = rootPath.resolve(pathName.replace(
             PATH_TOKEN_DELIMITER, rootPath.getFileSystem().getSeparator()));
-        logger.debug("leafPath: {}", leafPath);
+        logger.debug("leaf path: {}", leafPath);
 
         if (createParent) {
             final Path parent = leafPath.getParent();
             logger.debug("parent: {}", parent);
-            logger.debug("parent.directory: {}", Files.isDirectory(parent));
             if (!Files.isDirectory(parent)) {
                 try {
                     final Path created = Files.createDirectories(parent);
@@ -356,7 +355,10 @@ public class LocalFileBack implements FileBack {
             .map(Path::toString).collect(joining("/"));
         logger.debug("path name: {}", pathName);
         ofNullable(fileContext.pathNameConsumer()).ifPresent(
-            c -> c.accept(pathName));
+            c -> {
+                logger.debug("accepting path name consumer");
+                c.accept(pathName);
+            });
 
         ofNullable(fileContext.targetChannelConsumer()).ifPresent(c -> {
             logger.debug("target channel consumer presents");
