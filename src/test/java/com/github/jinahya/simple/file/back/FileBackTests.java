@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Jin Kwon &lt;jinahya_at_gmail.com&gt;.
+ * Copyright 2015 Jin Kwon &lt;jinahya_at_gmail.com&gt;.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public final class FileBackTests {
      *
      * @return a new random root path.
      */
-    public static Path randomLocalRoot() {
+    public static Path randomRootPath() {
 
         final File tempDir = Files.createTempDir();
         tempDir.deleteOnExit();
@@ -53,12 +53,21 @@ public final class FileBackTests {
     }
 
 
-    public static ByteBuffer randomKeyBuffer() {
+    public static ByteBuffer randomFileKey() {
 
         final byte[] keyBytes = new byte[current().nextInt(1, 128)];
         current().nextBytes(keyBytes);
 
         return ByteBuffer.wrap(keyBytes);
+    }
+
+
+    public static byte[] randomFileBytes() {
+
+        final byte[] fileBytes = new byte[current().nextInt(1, 1024)];
+        current().nextBytes(fileBytes);
+
+        return fileBytes;
     }
 
 
