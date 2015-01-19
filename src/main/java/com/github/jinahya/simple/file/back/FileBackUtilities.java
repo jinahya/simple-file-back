@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 
 /**
  * A utility class for file back implementations.
- *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
 public final class FileBackUtilities {

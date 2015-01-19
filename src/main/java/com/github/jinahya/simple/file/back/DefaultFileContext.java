@@ -19,6 +19,7 @@ package com.github.jinahya.simple.file.back;
 
 
 /**
+ * Default implementation of {@link FileContext}.
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */

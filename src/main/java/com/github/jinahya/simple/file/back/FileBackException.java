@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package com.github.jinahya.simple.file.back;
 
 
 /**
+ * An exception for file operation.
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */

@@ -29,77 +29,178 @@ import java.util.function.Supplier;
 
 
 /**
+ * A context between clients and file backs.
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
 public interface FileContext {
 
 
+    /**
+     * Properties can be configured within file contexts.
+     */
     public static enum PropertyKey {
 
 
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<FileOperation>} which supplies the target operation.
+         */
         FILE_OPERATION_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<String>} which consumes the path name.
+         */
         PATH_NAME_CONSUMER,
+        /**
+         * A constant for the key of a property whose values si an instance of
+         * {@code Supplier<String>} which supplies the path name.
+         */
         PATH_NAME_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<ReadableByteChannel>} which consumes source file
+         * channel.
+         */
         SOURCE_CHANNEL_CONSUMER,
-        SOURCE_CHANNEL_SUPPLIER,
-        SOURCE_COPIED_CONSUMER,
-        SOURCE_OBJECT_CONSUMER,
-        SOURCE_KEY_SUPPLIER,
-        TARGET_KEY_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<WritableByteChannel>} which consumes the target file
+         * channel.
+         */
         TARGET_CHANNEL_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<RedableByteChanel>} which supplies the source file
+         * channel.
+         */
+        SOURCE_CHANNEL_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<WritableByteChannel>} which supplies a target file
+         * channel.
+         */
         TARGET_CHANNEL_SUPPLIER,
+        /**
+         * A constants for the key of a property whose value is an instance of
+         * {@code Consumer<Long>} which consumes the number of bytes copied from
+         * the source file part.
+         */
+        SOURCE_COPIED_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<Long>} which consumes the number of bytes copied to
+         * target file part.
+         */
         TARGET_COPIED_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<ByteBuffer>} which supplies the key bytes for
+         * locating the source file part.
+         */
+        SOURCE_KEY_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<ByteBuffer>} which supplies the key bytes the
+         * locating the target file part.
+         */
+        TARGET_KEY_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<Object>} which consumes an implementation specific
+         * type of source file reference.
+         */
+        SOURCE_OBJECT_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<Object>} which consumes an implementation specific
+         * type of target file reference.
+         */
         TARGET_OBJECT_CONSUMER
 
 
     }
 
 
+    /**
+     * Returns an optional property value mapped to specified
+     * {@code propertyKey}.
+     *
+     * @param propertyKey the property key
+     *
+     * @return an optional value.
+     */
     Optional<Object> property(PropertyKey propertyKey);
 
 
-    default <T> Optional<T> property(final PropertyKey key,
-                                     final Class<T> type) {
+    /**
+     * Returns an optional property value mapped to specified
+     * {@code propertyKey}.
+     *
+     * @param <T> value type parameter
+     * @param proprtyKey property key
+     * @param valueType value type.
+     *
+     * @return an optional value of property.
+     */
+    default <T> Optional<T> property(final PropertyKey proprtyKey,
+                                     final Class<T> valueType) {
 
-        if (type == null) {
+        if (valueType == null) {
             throw new NullPointerException("null type");
         }
 
-        return ofNullable(type.cast(property(key).orElse(null)));
+        return ofNullable(valueType.cast(property(proprtyKey).orElse(null)));
     }
 
 
-    Optional<Object> property(PropertyKey key, Object value);
+    /**
+     * Sets a new property value mapped to specified {@code propertyKey}. Note
+     * that providing {@code null} for {@code propertyValue} will remove
+     * previous mapping.
+     *
+     * @param propertyKey the property key
+     * @param propertyValue the property value; {@code null} for removal of
+     * mapping.
+     *
+     * @return an optional property value previously mapped to specified
+     * {@code propertyKey}.
+     */
+    Optional<Object> property(PropertyKey propertyKey, Object propertyValue);
 
 
-    default <T> Optional<T> property(final PropertyKey key, final T value,
-                                     final Class<T> type) {
+    /**
+     * Sets a new property value mapped to specified {@code propertyKey}.
+     *
+     * @param <T> value type parameter
+     * @param propertyKey property key
+     * @param propertyValue the new property value.
+     * @param valueType value type.
+     *
+     * @return an optional property value previously mapped to specified
+     * {@code propertyKey}.
+     */
+    default <T> Optional<T> property(final PropertyKey propertyKey,
+                                     final T propertyValue,
+                                     final Class<T> valueType) {
 
-        if (type == null) {
+        if (valueType == null) {
             throw new NullPointerException("null type");
         }
 
-        return ofNullable(type.cast(property(key, value).orElse(null)));
+        return ofNullable(valueType.cast(property(propertyKey, propertyValue)
+            .orElse(null)));
     }
 
 
-//    @SuppressWarnings("unchecked")
-//    default Supplier<ByteBuffer> fileKeySupplier() {
-//
-//        return (Supplier<ByteBuffer>) property(PropertyKey.FILE_KEY_SUPPLIER)
-//            .orElse(null);
-//    }
-//
-//
-//    @SuppressWarnings("unchecked")
-//    default Supplier<ByteBuffer> fileKeySupplier(
-//        final Supplier<ByteBuffer> keyBufferSupplier) {
-//
-//        return (Supplier<ByteBuffer>) property(PropertyKey.FILE_KEY_SUPPLIER,
-//                                               keyBufferSupplier)
-//            .orElse(null);
-//    }
+    /**
+     * Return the current property value mapped to
+     * {@link PropertyKey#FILE_OPERATION_SUPPLIER}.
+     *
+     * @return the current value mapped to
+     * {@link PropertyKey#FILE_OPERATION_SUPPLIER} or {@code null} if no
+     * mappings found.
+     */
     @SuppressWarnings("unchecked")
     default Supplier<FileOperation> fileOperationSupplier() {
 
@@ -109,6 +210,16 @@ public interface FileContext {
     }
 
 
+    /**
+     * Sets a new property value mapped to
+     * {@link PropertyKey#FILE_OPERATION_SUPPLIER}.
+     *
+     * @param fileOperationSupplier the new value.
+     *
+     * @return the previous value mapped to
+     * {@link PropertyKey#FILE_OPERATION_SUPPLIER} or {@code null} if there is
+     * no mappings.
+     */
     @SuppressWarnings("unchecked")
     default Supplier<FileOperation> fileOperationSupplier(
         final Supplier<FileOperation> fileOperationSupplier) {
@@ -193,6 +304,14 @@ public interface FileContext {
     }
 
 
+    /**
+     * Returns the current property value mapped to
+     * {@link PropertyKey#SOURCE_COPIED_CONSUMER}.
+     *
+     * @return the current property value mapped to
+     * {@link PropertyKey#SOURCE_COPIED_CONSUMER} or {@code null} if no mappings
+     * found.
+     */
     @SuppressWarnings("unchecked")
     default Consumer<Long> sourceCopiedConsumer() {
 
@@ -201,6 +320,14 @@ public interface FileContext {
     }
 
 
+    /**
+     * Sets the new value for {@link PropertyKey#SOURCE_COPIED_CONSUMER}.
+     *
+     * @param sourceCopiedConsumer the new value; {@code null} for removal of
+     * entry.
+     *
+     * @return previous value mapped; possibly {@code null}.
+     */
     @SuppressWarnings("unchecked")
     default Consumer<Long> sourceCopiedConsumer(
         final Consumer<Long> sourceCopiedConsumer) {

@@ -22,25 +22,49 @@ import java.io.IOException;
 
 
 /**
- *
+ * An interface for file operation.
  */
 @FunctionalInterface
 public interface FileBack {
 
 
+    /**
+     * The file operations.
+     */
     public static enum FileOperation {
 
 
+        /**
+         * A constant for coping files.
+         */
         COPY,
+        /**
+         * A constant for deleting files.
+         */
         DELETE,
+        /**
+         * A constant for reading files.
+         */
         READ,
+        /**
+         * A constant for writing files.
+         */
         WRITE
 
 
     }
 
 
-    void operate(FileContext context) throws IOException, FileBackException;
+    /**
+     * Operates a file operation using various properties stored in specified
+     * {@code fileContext}.
+     *
+     * @param fileContext a file context.
+     *
+     * @throws IOException if an I/O error occurs.
+     * @throws FileBackException if a file back error occurs.
+     */
+    void operate(FileContext fileContext) throws IOException, FileBackException;
 
 
 }

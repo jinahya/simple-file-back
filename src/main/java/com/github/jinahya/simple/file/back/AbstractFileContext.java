@@ -25,6 +25,7 @@ import java.util.Optional;
 
 
 /**
+ * An abstract class partially implementing {@link FileContext}.
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
@@ -58,6 +59,11 @@ public abstract class AbstractFileContext implements FileContext {
     }
 
 
+    /**
+     * Returns a map of properties.
+     *
+     * @return properties.
+     */
     protected Map<PropertyKey, Object> properties() {
 
         if (properties == null) {
