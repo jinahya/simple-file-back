@@ -128,14 +128,14 @@ public class LocalFileBackTest {
         }
 
         fileContext.sourceObjectConsumer(
-            v -> logger.debug("source object: {}", v));
+            v -> logger.trace("source object: {}", v));
         fileContext.sourceCopiedConsumer(
-            v -> logger.debug("source copid: {}", v));
+            v -> logger.trace("source copid: {}", v));
 
         fileContext.targetObjectConsumer(
-            v -> logger.debug("target object: {}", v));
+            v -> logger.trace("target object: {}", v));
         fileContext.targetCopiedConsumer(
-            v -> logger.debug("target copid: {}", v));
+            v -> logger.trace("target copid: {}", v));
     }
 
 
@@ -164,7 +164,7 @@ public class LocalFileBackTest {
         if (fileWritten) {
             Files.write(sourceLeafPath, fileBytes, StandardOpenOption.CREATE,
                         StandardOpenOption.WRITE);
-            logger.debug("file written");
+            logger.trace("file written");
         }
 
         fileBack.operate(fileContext);
@@ -191,7 +191,7 @@ public class LocalFileBackTest {
         if (fileWritten) {
             Files.write(leafPath, fileBytes, StandardOpenOption.CREATE,
                         StandardOpenOption.WRITE);
-            logger.debug("file written");
+            logger.trace("file written");
         }
 
         fileBack.operate(fileContext);
@@ -214,7 +214,7 @@ public class LocalFileBackTest {
         if (fileWritten) {
             Files.write(leafPath, fileBytes, StandardOpenOption.CREATE,
                         StandardOpenOption.WRITE);
-            logger.debug("file written");
+            logger.trace("file written");
         }
 
         fileContext.sourceChannelConsumer(v -> {
@@ -258,7 +258,7 @@ public class LocalFileBackTest {
         if (fileWritten) {
             Files.write(leafPath, fileBytes, StandardOpenOption.CREATE_NEW,
                         StandardOpenOption.WRITE);
-            logger.debug("file written");
+            logger.trace("file written");
         }
 
         fileContext.sourceChannelSupplier(
