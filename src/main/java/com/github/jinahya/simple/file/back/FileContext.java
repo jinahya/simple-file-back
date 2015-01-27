@@ -18,18 +18,18 @@
 package com.github.jinahya.simple.file.back;
 
 
-import java.io.InputStream;
+import com.github.jinahya.simple.file.back.FileBack.FileOperation;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import static java.util.Optional.ofNullable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
 /**
+ * A context between clients and file backs.
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
@@ -37,271 +37,195 @@ public interface FileContext {
 
 
     /**
-     * Returns the property value mapped to specified {@code name}.
-     *
-     * @param name the name of the property
-     *
-     * @return an optional of the property value mapped to specified
-     * {@code name}.
-     *
-     * @see #property(java.lang.String, java.lang.Class)
+     * Properties can be configured within file contexts.
      */
-    Optional<Object> property(String name);
+    public static enum PropertyKey {
 
 
-    /**
-     * Returns an optional property value mapped to specified {@code name}.
-     *
-     * @param <T> value type parameter
-     * @param name property name.
-     * @param type property value type.
-     *
-     * @return an optional property value.
-     *
-     * @see #property(java.lang.String)
-     */
-    default <T> Optional<T> property(final String name, final Class<T> type) {
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<FileOperation>} which supplies the target operation.
+         */
+        FILE_OPERATION_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<String>} which consumes the path name.
+         */
+        PATH_NAME_CONSUMER,
+        /**
+         * A constant for the key of a property whose values si an instance of
+         * {@code Supplier<String>} which supplies the path name.
+         */
+        PATH_NAME_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<ReadableByteChannel>} which consumes source file
+         * channel.
+         */
+        SOURCE_CHANNEL_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<WritableByteChannel>} which consumes the target file
+         * channel.
+         */
+        TARGET_CHANNEL_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<RedableByteChanel>} which supplies the source file
+         * channel.
+         */
+        SOURCE_CHANNEL_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<WritableByteChannel>} which supplies a target file
+         * channel.
+         */
+        TARGET_CHANNEL_SUPPLIER,
+        /**
+         * A constants for the key of a property whose value is an instance of
+         * {@code Consumer<Long>} which consumes the number of bytes copied from
+         * the source file part.
+         */
+        SOURCE_COPIED_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<Long>} which consumes the number of bytes copied to
+         * target file part.
+         */
+        TARGET_COPIED_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<ByteBuffer>} which supplies the key bytes for
+         * locating the source file part.
+         */
+        SOURCE_KEY_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<ByteBuffer>} which supplies the key bytes the
+         * locating the target file part.
+         */
+        TARGET_KEY_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<Object>} which consumes an implementation specific
+         * type of source file reference.
+         */
+        SOURCE_OBJECT_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<Object>} which consumes an implementation specific
+         * type of target file reference.
+         */
+        TARGET_OBJECT_CONSUMER
 
-        if (type == null) {
-            throw new NullPointerException("null type");
-        }
 
-        return Optional.ofNullable(type.cast(property(name).orElse(null)));
     }
 
 
     /**
-     * Sets a property value mapped to specified {@code name}. The property will
-     * be removed if {@code value} is {@code null}.
+     * Returns an optional property value mapped to specified
+     * {@code propertyKey}.
      *
-     * @param name the name of the property
-     * @param value the new value of the property; {@code null} for removing.
+     * @param propertyKey the property key
      *
-     * @return an optional of previous value.
-     *
-     * @see #property(java.lang.String, java.lang.Object, java.lang.Class)
+     * @return an optional value.
      */
-    Optional<Object> property(String name, Object value);
+    Optional<Object> property(PropertyKey propertyKey);
 
 
     /**
-     * Sets a property value.
+     * Returns an optional property value mapped to specified
+     * {@code propertyKey}.
      *
-     * @param <T> property value type parameter
-     * @param name property name
-     * @param value property value
-     * @param type property value type
+     * @param <T> value type parameter
+     * @param proprtyKey property key
+     * @param valueType value type.
      *
-     * @return an optional property value previously mapped to specified
-     * {@code name}.
-     *
-     * @see #property(java.lang.String, java.lang.Object)
+     * @return an optional value of property.
      */
-    default <T> Optional<T> property(final String name, final T value,
-                                     final Class<T> type) {
+    default <T> Optional<T> property(final PropertyKey proprtyKey,
+                                     final Class<T> valueType) {
 
-        if (type == null) {
+        if (valueType == null) {
             throw new NullPointerException("null type");
         }
 
-        return Optional.ofNullable(type.cast(property(name, value)
+        return ofNullable(valueType.cast(property(proprtyKey).orElse(null)));
+    }
+
+
+    /**
+     * Sets a new property value mapped to specified {@code propertyKey}. Note
+     * that providing {@code null} for {@code propertyValue} will remove
+     * previous mapping.
+     *
+     * @param propertyKey the property key
+     * @param propertyValue the property value; {@code null} for removal of
+     * mapping.
+     *
+     * @return an optional property value previously mapped to specified
+     * {@code propertyKey}.
+     */
+    Optional<Object> property(PropertyKey propertyKey, Object propertyValue);
+
+
+    /**
+     * Sets a new property value mapped to specified {@code propertyKey}.
+     *
+     * @param <T> value type parameter
+     * @param propertyKey property key
+     * @param propertyValue the new property value.
+     * @param valueType value type.
+     *
+     * @return an optional property value previously mapped to specified
+     * {@code propertyKey}.
+     */
+    default <T> Optional<T> property(final PropertyKey propertyKey,
+                                     final T propertyValue,
+                                     final Class<T> valueType) {
+
+        if (valueType == null) {
+            throw new NullPointerException("null type");
+        }
+
+        return ofNullable(valueType.cast(property(propertyKey, propertyValue)
             .orElse(null)));
     }
 
 
+    /**
+     * Return the current property value mapped to
+     * {@link PropertyKey#FILE_OPERATION_SUPPLIER}.
+     *
+     * @return the current value mapped to
+     * {@link PropertyKey#FILE_OPERATION_SUPPLIER} or {@code null} if no
+     * mappings found.
+     */
     @SuppressWarnings("unchecked")
-    default Supplier<FileBack> fileBackSupplier() {
+    default Supplier<FileOperation> fileOperationSupplier() {
 
-        return (Supplier<FileBack>) property(
-            FileBackConstants.PROPERTY_FILE_BACK_SUPPLIER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<FileBack> fileBackSupplier(
-        final Supplier<FileBack> fileBackSupplier) {
-
-        return (Supplier<FileBack>) property(
-            FileBackConstants.PROPERTY_FILE_BACK_SUPPLIER, fileBackSupplier)
+        return (Supplier<FileOperation>) property(
+            PropertyKey.FILE_OPERATION_SUPPLIER)
             .orElse(null);
     }
 
 
     /**
-     * Returns the current property value mapped to
-     * {@link FileBackConstants#PROPERTY_KEY_BUFFER_SUPPLIER}.
+     * Sets a new property value mapped to
+     * {@link PropertyKey#FILE_OPERATION_SUPPLIER}.
+     *
+     * @param fileOperationSupplier the new value.
      *
      * @return the previous value mapped to
-     * {@link FileBackConstants#PROPERTY_KEY_BUFFER_SUPPLIER}.
+     * {@link PropertyKey#FILE_OPERATION_SUPPLIER} or {@code null} if there is
+     * no mappings.
      */
     @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> keyBufferSupplier() {
+    default Supplier<FileOperation> fileOperationSupplier(
+        final Supplier<FileOperation> fileOperationSupplier) {
 
-        return (Supplier<ByteBuffer>) property(
-            FileBackConstants.PROPERTY_KEY_BUFFER_SUPPLIER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> keyBufferSupplier(
-        final Supplier<ByteBuffer> keyBytesSupplier) {
-
-        return (Supplier<ByteBuffer>) property(
-            FileBackConstants.PROPERTY_KEY_BUFFER_SUPPLIER, keyBytesSupplier)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<String> fileSuffixSupplier() {
-
-        return (Supplier<String>) property(
-            FileBackConstants.PROPERTY_FILE_SUFFIX_SUPPLIER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<String> fileSuffixSupplier(
-        final Supplier<String> fileSuffixSupplier) {
-
-        return (Supplier<String>) property(
-            FileBackConstants.PROPERTY_FILE_SUFFIX_SUPPLIER, fileSuffixSupplier)
-            .orElse(null);
-    }
-
-
-    /**
-     *
-     * @param keyBytes
-     *
-     * @return
-     *
-     * @deprecated Use {@link #keyBufferSupplier(java.util.function.Supplier)}
-     */
-    @Deprecated
-    default Supplier<ByteBuffer> keyBufferSupplier(final byte[] keyBytes) {
-
-        return keyBufferSupplier(
-            keyBytes == null ? null : () -> ByteBuffer.wrap(keyBytes));
-    }
-
-
-    /**
-     *
-     * @param keyString
-     *
-     * @return
-     *
-     * @deprecated Use {@link #keyBufferSupplier(java.util.function.Supplier) }
-     */
-    @Deprecated
-    default Supplier<ByteBuffer> keyBufferSupplier(final String keyString) {
-
-        return keyBufferSupplier(
-            keyString == null
-            ? null : keyString.getBytes(StandardCharsets.UTF_8));
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Consumer<String> contentTypeConsumer() {
-
-        return (Consumer<String>) property(
-            FileBackConstants.PROPERTY_CONTENT_TYPE_CONSUMER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Consumer<String> contentTypeConsumer(
-        final Consumer<String> contentTypeConsumer) {
-
-        return (Consumer<String>) property(
-            FileBackConstants.PROPERTY_CONTENT_TYPE_CONSUMER,
-            contentTypeConsumer)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<String> contentTypeSupplier() {
-
-        return (Supplier<String>) property(
-            FileBackConstants.PROPERTY_CONTENT_TYPE_SUPPLIER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<String> contentTypeSupplier(
-        final Supplier<String> contentTypeSupplier) {
-
-        return (Supplier<String>) property(
-            FileBackConstants.PROPERTY_CONTENT_TYPE_SUPPLIER,
-            contentTypeSupplier)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Consumer<Long> contentLengthConsumer() {
-
-        return (Consumer<Long>) property(
-            FileBackConstants.PROPERTY_CONTENT_LENGTH_CONSUMER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Consumer<Long> contentLengthConsumer(
-        final Consumer<Long> contentLengthConsumer) {
-
-        return (Consumer<Long>) property(
-            FileBackConstants.PROPERTY_CONTENT_LENGTH_CONSUMER,
-            contentLengthConsumer)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<Long> contentLengthSupplier() {
-
-        return (Supplier<Long>) property(
-            FileBackConstants.PROPERTY_CONTENT_LENGTH_SUPPLIER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<Long> contentLengthSupplier(
-        final Supplier<Long> contentLengthSupplier) {
-
-        return (Supplier<Long>) property(
-            FileBackConstants.PROPERTY_CONTENT_LENGTH_SUPPLIER,
-            contentLengthSupplier)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Consumer<Boolean> fileDeletedConsumer() {
-
-        return (Consumer<Boolean>) property(
-            FileBackConstants.PROPERTY_FILE_DELETED_CONSUMER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Consumer<Boolean> fileDeletedConsumer(
-        final Consumer<Boolean> fileDeletedConsumer) {
-
-        return (Consumer<Boolean>) property(
-            FileBackConstants.PROPERTY_FILE_DELETED_CONSUMER,
-            fileDeletedConsumer)
+        return (Supplier<FileOperation>) property(
+            PropertyKey.FILE_OPERATION_SUPPLIER, fileOperationSupplier)
             .orElse(null);
     }
 
@@ -309,8 +233,7 @@ public interface FileContext {
     @SuppressWarnings("unchecked")
     default Consumer<String> pathNameConsumer() {
 
-        return (Consumer<String>) property(
-            FileBackConstants.PROPERTY_PATH_NAME_CONSUMER)
+        return (Consumer<String>) property(PropertyKey.PATH_NAME_CONSUMER)
             .orElse(null);
     }
 
@@ -319,8 +242,8 @@ public interface FileContext {
     default Consumer<String> pathNameConsumer(
         final Consumer<String> pathNameConsumer) {
 
-        return (Consumer<String>) property(
-            FileBackConstants.PROPERTY_PATH_NAME_CONSUMER, pathNameConsumer)
+        return (Consumer<String>) property(PropertyKey.PATH_NAME_CONSUMER,
+                                           pathNameConsumer)
             .orElse(null);
     }
 
@@ -328,8 +251,7 @@ public interface FileContext {
     @SuppressWarnings("unchecked")
     default Supplier<String> pathNameSupplier() {
 
-        return (Supplier<String>) property(
-            FileBackConstants.PROPERTY_PATH_NAME_SUPPLIER)
+        return (Supplier<String>) property(PropertyKey.PATH_NAME_SUPPLIER)
             .orElse(null);
     }
 
@@ -338,8 +260,27 @@ public interface FileContext {
     default Supplier<String> pathNameSupplier(
         final Supplier<String> pathNameSupplier) {
 
-        return (Supplier<String>) property(
-            FileBackConstants.PROPERTY_PATH_NAME_SUPPLIER, pathNameSupplier)
+        return (Supplier<String>) property(PropertyKey.PATH_NAME_SUPPLIER,
+                                           pathNameSupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<ReadableByteChannel> sourceChannelConsumer() {
+
+        return (Consumer<ReadableByteChannel>) property(
+            PropertyKey.SOURCE_CHANNEL_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<ReadableByteChannel> sourceChannelConsumer(
+        final Consumer<ReadableByteChannel> sourceChannelConsumer) {
+
+        return (Consumer<ReadableByteChannel>) property(
+            PropertyKey.SOURCE_CHANNEL_CONSUMER, sourceChannelConsumer)
             .orElse(null);
     }
 
@@ -348,55 +289,143 @@ public interface FileContext {
     default Supplier<ReadableByteChannel> sourceChannelSupplier() {
 
         return (Supplier<ReadableByteChannel>) property(
-            FileBackConstants.PROPERTY_SOURCE_CHANNEL_SUPPLIER)
+            PropertyKey.SOURCE_CHANNEL_SUPPLIER)
             .orElse(null);
     }
 
 
     @SuppressWarnings("unchecked")
     default Supplier<ReadableByteChannel> sourceChannelSupplier(
-        final Supplier<ReadableByteChannel> sourceChannelSupplier) {
+        final Supplier<ReadableByteChannel> sourceChannelSuppleir) {
 
         return (Supplier<ReadableByteChannel>) property(
-            FileBackConstants.PROPERTY_SOURCE_CHANNEL_SUPPLIER,
-            sourceChannelSupplier)
+            PropertyKey.SOURCE_CHANNEL_SUPPLIER, sourceChannelSuppleir)
             .orElse(null);
     }
 
 
     /**
+     * Returns the current property value mapped to
+     * {@link PropertyKey#SOURCE_COPIED_CONSUMER}.
      *
-     * @param sourceChannel
-     *
-     * @return
-     *
-     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
-     * }
+     * @return the current property value mapped to
+     * {@link PropertyKey#SOURCE_COPIED_CONSUMER} or {@code null} if no mappings
+     * found.
      */
-    @Deprecated
-    default Supplier<ReadableByteChannel> sourceChannelSupplier(
-        final ReadableByteChannel sourceChannel) {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> sourceCopiedConsumer() {
 
-        return sourceChannelSupplier(
-            sourceChannel == null ? null : () -> sourceChannel);
+        return (Consumer<Long>) property(PropertyKey.SOURCE_COPIED_CONSUMER)
+            .orElse(null);
     }
 
 
     /**
+     * Sets the new value for {@link PropertyKey#SOURCE_COPIED_CONSUMER}.
      *
-     * @param sourceStream
+     * @param sourceCopiedConsumer the new value; {@code null} for removal of
+     * entry.
      *
-     * @return
-     *
-     * @deprecated Use {@link #sourceChannelSupplier(java.util.function.Supplier)
-     * }
+     * @return previous value mapped; possibly {@code null}.
      */
-    @Deprecated
-    default Supplier<ReadableByteChannel> sourceChannelSupplier(
-        final InputStream sourceStream) {
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> sourceCopiedConsumer(
+        final Consumer<Long> sourceCopiedConsumer) {
 
-        return sourceChannelSupplier(
-            sourceStream == null ? null : Channels.newChannel(sourceStream));
+        return (Consumer<Long>) property(PropertyKey.SOURCE_COPIED_CONSUMER,
+                                         sourceCopiedConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> sourceKeySupplier() {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.SOURCE_KEY_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> sourceKeySupplier(
+        final Supplier<ByteBuffer> sourceKeySupplier) {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.SOURCE_KEY_SUPPLIER,
+                                               sourceKeySupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Object> sourceObjectConsumer() {
+
+        return (Consumer<Object>) property(PropertyKey.SOURCE_OBJECT_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Object> sourceObjectConsumer(
+        final Consumer<Object> sourceObjectConsumer) {
+
+        return (Consumer<Object>) property(PropertyKey.SOURCE_OBJECT_CONSUMER,
+                                           sourceObjectConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> targetCopiedConsumer() {
+
+        return (Consumer<Long>) property(PropertyKey.TARGET_COPIED_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<Long> targetCopiedConsumer(
+        final Consumer<Long> targetCopiedConsumer) {
+
+        return (Consumer<Long>) property(PropertyKey.TARGET_COPIED_CONSUMER,
+                                         targetCopiedConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> targetKeySupplier() {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> targetKeySupplier(
+        final Supplier<ByteBuffer> targetKeySupplier) {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_SUPPLIER,
+                                               targetKeySupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<WritableByteChannel> targetChannelConsumer() {
+
+        return (Consumer<WritableByteChannel>) property(
+            PropertyKey.TARGET_CHANNEL_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<WritableByteChannel> targetChannelConsumer(
+        final Consumer<WritableByteChannel> targetChannelConsumer) {
+
+        return (Consumer<WritableByteChannel>) property(
+            PropertyKey.TARGET_CHANNEL_CONSUMER, targetChannelConsumer)
+            .orElse(null);
     }
 
 
@@ -404,7 +433,7 @@ public interface FileContext {
     default Supplier<WritableByteChannel> targetChannelSupplier() {
 
         return (Supplier<WritableByteChannel>) property(
-            FileBackConstants.PROPERTY_TARGET_CHANNEL_SUPPLIER)
+            PropertyKey.TARGET_CHANNEL_SUPPLIER)
             .orElse(null);
     }
 
@@ -414,48 +443,25 @@ public interface FileContext {
         final Supplier<WritableByteChannel> targetChannelSupplier) {
 
         return (Supplier<WritableByteChannel>) property(
-            FileBackConstants.PROPERTY_TARGET_CHANNEL_SUPPLIER,
-            targetChannelSupplier)
+            PropertyKey.TARGET_CHANNEL_SUPPLIER, targetChannelSupplier)
             .orElse(null);
     }
 
 
     @SuppressWarnings("unchecked")
-    default Consumer<Long> sourceCopiedConsumer() {
+    default Consumer<Object> targetObjectConsumer() {
 
-        return (Consumer<Long>) property(
-            FileBackConstants.PROPERTY_SOURCE_COPIED_CONSUMER)
+        return (Consumer<Object>) property(PropertyKey.TARGET_OBJECT_CONSUMER)
             .orElse(null);
     }
 
 
     @SuppressWarnings("unchecked")
-    default Consumer<Long> sourceCopiedConsumer(
-        final Consumer<Long> sourceCopiedConsumer) {
+    default Consumer<Object> targetObjectConsumer(
+        final Consumer<Object> targetObjectConsumer) {
 
-        return (Consumer<Long>) property(
-            FileBackConstants.PROPERTY_SOURCE_COPIED_CONSUMER,
-            sourceCopiedConsumer)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Consumer<Long> targetCopiedConsumer() {
-
-        return (Consumer<Long>) property(
-            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Consumer<Long> targetCopiedConsumer(
-        final Consumer<Long> targetCopiedConsumer) {
-
-        return (Consumer<Long>) property(
-            FileBackConstants.PROPERTY_TARGET_COPIED_CONSUMER,
-            targetCopiedConsumer)
+        return (Consumer<Object>) property(PropertyKey.TARGET_OBJECT_CONSUMER,
+                                           targetObjectConsumer)
             .orElse(null);
     }
 

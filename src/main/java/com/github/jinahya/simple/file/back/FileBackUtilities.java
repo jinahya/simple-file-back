@@ -28,30 +28,36 @@ import java.util.stream.Stream;
 
 
 /**
- *
+ * A utility class for file back implementations.
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
 public final class FileBackUtilities {
 
 
-//    private static final String KEY_DIGEST_ALGORITHM = "SHA-1"; // 160 bits
-//
-//
-//    private static final int PATH_TOKEN_LENGTH = 3; // 16 * 16 * 16 = 4096
-//
-//
-//    private static final String PATH_TOKEN_DELIMITER = "/";
-    public static String keyBufferToPathName(final ByteBuffer keyBuffer,
-                                             final String digestAlgorithm,
-                                             final int tokenLength,
-                                             final String tokenDelimiter)
+    /**
+     * Converts given file key to a path name.
+     *
+     * @param fileKey the file key to convert
+     * @param digestAlgorithm a message digest algorithm to hash.
+     * @param tokenLength the number of characters to split.
+     * @param tokenDelimiter the delimiter string used when joining split
+     * tokens.
+     *
+     * @return a path name.
+     *
+     * @throws NoSuchAlgorithmException if {@code digestAlgorithm} is unknown.
+     */
+    public static String fileKeyToPathName(final ByteBuffer fileKey,
+                                           final String digestAlgorithm,
+                                           final int tokenLength,
+                                           final String tokenDelimiter)
         throws NoSuchAlgorithmException {
 
-        if (keyBuffer == null) {
-            throw new NullPointerException("null keyBuffer");
+        if (fileKey == null) {
+            throw new NullPointerException("null fileKey");
         }
 
-        if (keyBuffer.remaining() == 0) {
+        if (fileKey.remaining() == 0) {
             throw new IllegalArgumentException("keyBuffer.remaining == 0");
         }
 
@@ -59,9 +65,9 @@ public final class FileBackUtilities {
             throw new NullPointerException("null digestAlgorithm");
         }
 
-        if (tokenLength < 0) {
+        if (tokenLength <= 0) {
             throw new IllegalArgumentException(
-                "tokenLength(" + tokenLength + ") < 0");
+                "tokenLength(" + tokenLength + ") <= 0");
         }
 
         if (tokenDelimiter == null) {
@@ -69,7 +75,7 @@ public final class FileBackUtilities {
         }
 
         final MessageDigest digest = MessageDigest.getInstance(digestAlgorithm);
-        digest.update(keyBuffer.asReadOnlyBuffer());
+        digest.update(fileKey.asReadOnlyBuffer());
         final byte[] digested = digest.digest();
 
         final String hexed = IntStream.range(0, digested.length)
@@ -87,85 +93,6 @@ public final class FileBackUtilities {
     }
 
 
-//    @Deprecated
-//    public static String keyBufferToPathName(final ByteBuffer keyBuffer,
-//                                             final int tokenLength,
-//                                             final String tokenDelimiter) {
-//
-//        if (keyBuffer == null) {
-//            throw new NullPointerException("null keyBuffer");
-//        }
-//
-//        if (keyBuffer.remaining() == 0) {
-//            throw new IllegalArgumentException("keyBuffer.remaining == 0");
-//        }
-//
-//        if (tokenLength < 0) {
-//            throw new IllegalArgumentException(
-//                "tokenLength(" + tokenLength + ") < 0");
-//        }
-//
-//        if (tokenDelimiter == null) {
-//            throw new NullPointerException("null tokenDelimiter");
-//        }
-//
-//        final byte[] digested;
-//        try {
-//            final MessageDigest digest
-//                = MessageDigest.getInstance(KEY_DIGEST_ALGORITHM);
-//            digest.update(keyBuffer.asReadOnlyBuffer());
-//            digested = digest.digest();
-//        } catch (final NoSuchAlgorithmException nsae) {
-//            throw new RuntimeException(nsae);
-//        }
-//
-//        final String hexed = IntStream.range(0, digested.length)
-//            .collect(() -> new StringBuilder(digested.length * 2),
-//                     (b, i) -> new Formatter(b).format(
-//                         "%02x", digested[i] & 0xFF),
-//                     StringBuilder::append).toString();
-//
-//        final String joined = Stream.of(
-//            hexed.split("(?<=\\G.{" + tokenLength + "})"))
-//            .collect(Collectors.joining(tokenDelimiter));
-//
-//        return joined;
-//    }
-//
-//
-//    @Deprecated
-//    public static String keyBufferToPathName(final ByteBuffer keyBuffer) {
-//
-//        if (keyBuffer == null) {
-//            throw new NullPointerException("null keyBuffer");
-//        }
-//
-//        if (keyBuffer.remaining() == 0) {
-//            throw new IllegalArgumentException("keyBuffer.remaining == 0");
-//        }
-//
-//        final byte[] digested;
-//        try {
-//            final MessageDigest digest
-//                = MessageDigest.getInstance(KEY_DIGEST_ALGORITHM);
-//            digest.update(keyBuffer.asReadOnlyBuffer());
-//            digested = digest.digest();
-//        } catch (final NoSuchAlgorithmException nsae) {
-//            throw new RuntimeException(nsae);
-//        }
-//
-//        final String hexed = IntStream.range(0, digested.length)
-//            .collect(() -> new StringBuilder(digested.length * 2),
-//                     (b, i) -> new Formatter(b).format(
-//                         "%02x", digested[i] & 0xFF),
-//                     StringBuilder::append).toString();
-//
-//        final String joined = Stream.of(
-//            hexed.split("(?<=\\G.{" + PATH_TOKEN_LENGTH + "})"))
-//            .collect(Collectors.joining(PATH_TOKEN_DELIMITER));
-//
-//        return joined;
-//    }
     private FileBackUtilities() {
 
         super();

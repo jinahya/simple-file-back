@@ -13,58 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 package com.github.jinahya.simple.file.back;
 
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-
 /**
+ * Default implementation of {@link FileContext}.
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
  */
-public class DefaultFileContext implements FileContext {
-
-
-    @Override
-    public Optional<Object> property(final String name) {
-
-        if (name == null) {
-            throw new NullPointerException("null name");
-        }
-
-        return Optional.ofNullable(properties().get(name));
-    }
-
-
-    @Override
-    public Optional<Object> property(final String name, final Object value) {
-
-        if (name == null) {
-            throw new NullPointerException("null name");
-        }
-
-        if (value == null) {
-            return Optional.ofNullable(properties().remove(name));
-        }
-
-        return Optional.ofNullable(properties().put(name, value));
-    }
-
-
-    protected Map<String, Object> properties() {
-
-        if (properties == null) {
-            properties = new HashMap<>();
-        }
-
-        return properties;
-    }
-
-
-    private Map<String, Object> properties;
+public class DefaultFileContext extends AbstractFileContext {
 
 
 }

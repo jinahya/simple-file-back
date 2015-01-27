@@ -6,7 +6,7 @@
   <!-- The Basics -->
   <groupId>com.github.jinahya</groupId>
   <artifactId>simple-file-back</artifactId>
-  <version>0.4</version>
+  <version>0.8</version>
   <packaging>jar</packaging>
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -25,6 +25,12 @@
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -48,7 +54,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.9</version>
+      <version>1.7.10</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -251,7 +257,7 @@
     <connection>scm:git:git@github.com:jinahya/simple-file-back.git</connection>
     <developerConnection>scm:git:git@github.com:jinahya/simple-file-back.git</developerConnection>
     <url>https://github.com/jinahya/simple-file-back</url>
-    <tag>0.4</tag>
+    <tag>0.8</tag>
   </scm>
   <prerequisites>
     <maven>3.1.1</maven>
