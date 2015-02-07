@@ -366,6 +366,7 @@ public class LocalFileBack implements FileBack {
             try {
                 try (FileChannel targetChannel = FileChannel.open(
                     targetLeafPath, StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING,
                     StandardOpenOption.WRITE)) {
                     c.accept(targetChannel);
                     targetChannel.force(true);
