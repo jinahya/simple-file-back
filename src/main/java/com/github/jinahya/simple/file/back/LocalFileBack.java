@@ -65,7 +65,7 @@ public class LocalFileBack implements FileBack {
 
         String pathName = null;
         try {
-            pathName = FileBackUtilities.fileKeyToPathName(
+            pathName = FileBackUtilities.pathName(
                 fileKey, KEY_DIGEST_ALGORITHM, PATH_TOKEN_LENGTH,
                 PATH_TOKEN_DELIMITER);
         } catch (final NoSuchAlgorithmException nsae) {
