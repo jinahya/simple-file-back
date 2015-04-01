@@ -19,6 +19,8 @@ package com.github.jinahya.simple.file.back;
 
 
 import com.github.jinahya.simple.file.back.FileBack.FileOperation;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -46,16 +48,26 @@ public interface FileContext {
          * A constant for the key of a property whose value is an instance of
          * {@code Supplier<FileOperation>} which supplies the target operation.
          */
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<FileOperation>} which supplies the target operation.
+         */
         FILE_OPERATION_SUPPLIER,
         /**
          * A constant for the key of a property whose value is an instance of
          * {@code Consumer<String>} which consumes the path name.
+         *
+         * @deprecated
          */
+        @Deprecated
         PATH_NAME_CONSUMER,
         /**
          * A constant for the key of a property whose values si an instance of
          * {@code Supplier<String>} which supplies the path name.
+         *
+         * @deprecated
          */
+        @Deprecated
         PATH_NAME_SUPPLIER,
         /**
          * A constant for the key of a property whose value is an instance of
@@ -65,22 +77,10 @@ public interface FileContext {
         SOURCE_CHANNEL_CONSUMER,
         /**
          * A constant for the key of a property whose value is an instance of
-         * {@code Consumer<WritableByteChannel>} which consumes the target file
-         * channel.
-         */
-        TARGET_CHANNEL_CONSUMER,
-        /**
-         * A constant for the key of a property whose value is an instance of
          * {@code Supplier<RedableByteChanel>} which supplies the source file
          * channel.
          */
         SOURCE_CHANNEL_SUPPLIER,
-        /**
-         * A constant for the key of a property whose value is an instance of
-         * {@code Supplier<WritableByteChannel>} which supplies a target file
-         * channel.
-         */
-        TARGET_CHANNEL_SUPPLIER,
         /**
          * A constants for the key of a property whose value is an instance of
          * {@code Consumer<Long>} which consumes the number of bytes copied from
@@ -89,34 +89,54 @@ public interface FileContext {
         SOURCE_COPIED_CONSUMER,
         /**
          * A constant for the key of a property whose value is an instance of
-         * {@code Consumer<Long>} which consumes the number of bytes copied to
-         * target file part.
-         */
-        TARGET_COPIED_CONSUMER,
-        /**
-         * A constant for the key of a property whose value is an instance of
          * {@code Supplier<ByteBuffer>} which supplies the key bytes for
          * locating the source file part.
          */
         SOURCE_KEY_SUPPLIER,
         /**
          * A constant for the key of a property whose value is an instance of
-         * {@code Supplier<ByteBuffer>} which supplies the key bytes the
-         * locating the target file part.
-         */
-        TARGET_KEY_SUPPLIER,
-        /**
-         * A constant for the key of a property whose value is an instance of
          * {@code Consumer<Object>} which consumes an implementation specific
          * type of source file reference.
          */
         SOURCE_OBJECT_CONSUMER,
+        SOURCE_PATH_CONSUMER,
+        SOURCE_PATH_SUPPLIER,
+        SOURCE_STREAM_CONSUMER,
+        SOURCE_STREAM_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<WritableByteChannel>} which consumes the target file
+         * channel.
+         */
+        TARGET_CHANNEL_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<WritableByteChannel>} which supplies a target file
+         * channel.
+         */
+        TARGET_CHANNEL_SUPPLIER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Consumer<Long>} which consumes the number of bytes copied to
+         * target file part.
+         */
+        TARGET_COPIED_CONSUMER,
+        /**
+         * A constant for the key of a property whose value is an instance of
+         * {@code Supplier<ByteBuffer>} which supplies the key bytes the
+         * locating the target file part.
+         */
+        TARGET_KEY_SUPPLIER,
+        TARGET_PATH_CONSUMER,
+        TARGET_PATH_SUPPLIER,
         /**
          * A constant for the key of a property whose value is an instance of
          * {@code Consumer<Object>} which consumes an implementation specific
          * type of target file reference.
          */
-        TARGET_OBJECT_CONSUMER
+        TARGET_OBJECT_CONSUMER,
+        TARGET_STREAM_CONSUMER,
+        TARGET_STREAM_SUPPLIER
 
 
     }
@@ -231,6 +251,7 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     default Consumer<String> pathNameConsumer() {
 
         return (Consumer<String>) property(PropertyKey.PATH_NAME_CONSUMER)
@@ -239,6 +260,7 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     default Consumer<String> pathNameConsumer(
         final Consumer<String> pathNameConsumer) {
 
@@ -249,6 +271,7 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     default Supplier<String> pathNameSupplier() {
 
         return (Supplier<String>) property(PropertyKey.PATH_NAME_SUPPLIER)
@@ -257,12 +280,49 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     default Supplier<String> pathNameSupplier(
         final Supplier<String> pathNameSupplier) {
 
         return (Supplier<String>) property(PropertyKey.PATH_NAME_SUPPLIER,
                                            pathNameSupplier)
             .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<String> targetPathConsumer() {
+
+        return (Consumer<String>) (property(PropertyKey.TARGET_PATH_CONSUMER)
+                                   .orElse(null));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<String> targetPathConsumer(
+        final Consumer<String> targetPathConsumer) {
+
+        return (Consumer<String>) (property(PropertyKey.TARGET_PATH_CONSUMER,
+                                            targetPathConsumer)
+                                   .orElse(null));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> targetPathSupplier() {
+
+        return (Supplier<String>) (property(PropertyKey.TARGET_PATH_SUPPLIER)
+                                   .orElse(null));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> targetPathSupplier(
+        final Supplier<String> targetPathSupplier) {
+
+        return (Supplier<String>) (property(PropertyKey.TARGET_PATH_SUPPLIER,
+                                            targetPathSupplier)
+                                   .orElse(null));
     }
 
 
@@ -375,6 +435,80 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
+    default Consumer<String> sourcePathConsumer() {
+
+        return (Consumer<String>) (property(PropertyKey.SOURCE_PATH_CONSUMER)
+                                   .orElse(null));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<String> sourcePathConsumer(
+        final Consumer<String> sourcePathConsumer) {
+
+        return (Consumer<String>) (property(PropertyKey.SOURCE_PATH_CONSUMER,
+                                            sourcePathConsumer)
+                                   .orElse(null));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> sourcePathSupplier() {
+
+        return (Supplier<String>) (property(PropertyKey.SOURCE_PATH_SUPPLIER)
+                                   .orElse(null));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<String> sourcePathSupplier(
+        final Supplier<String> sourcePathSupplier) {
+
+        return (Supplier<String>) (property(PropertyKey.SOURCE_PATH_SUPPLIER,
+                                            sourcePathSupplier)
+                                   .orElse(null));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<InputStream> sourceStreamConsumer() {
+
+        return (Consumer<InputStream>) property(
+            PropertyKey.SOURCE_STREAM_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<InputStream> sourceStreamConsumer(
+        final Consumer<InputStream> sourceStreamConsumer) {
+
+        return (Consumer<InputStream>) property(
+            PropertyKey.SOURCE_STREAM_CONSUMER, sourceStreamConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<InputStream> sourceStreamSupplier() {
+
+        return (Supplier<InputStream>) property(
+            PropertyKey.SOURCE_STREAM_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<InputStream> sourceStreamSupplier(
+        final Supplier<InputStream> sourceStreamSupplier) {
+
+        return (Supplier<InputStream>) property(
+            PropertyKey.SOURCE_STREAM_SUPPLIER, sourceStreamSupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
     default Consumer<Long> targetCopiedConsumer() {
 
         return (Consumer<Long>) property(PropertyKey.TARGET_COPIED_CONSUMER)
@@ -388,24 +522,6 @@ public interface FileContext {
 
         return (Consumer<Long>) property(PropertyKey.TARGET_COPIED_CONSUMER,
                                          targetCopiedConsumer)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> targetKeySupplier() {
-
-        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_SUPPLIER)
-            .orElse(null);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    default Supplier<ByteBuffer> targetKeySupplier(
-        final Supplier<ByteBuffer> targetKeySupplier) {
-
-        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_SUPPLIER,
-                                               targetKeySupplier)
             .orElse(null);
     }
 
@@ -449,6 +565,24 @@ public interface FileContext {
 
 
     @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> targetKeySupplier() {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<ByteBuffer> targetKeySupplier(
+        final Supplier<ByteBuffer> targetKeySupplier) {
+
+        return (Supplier<ByteBuffer>) property(PropertyKey.TARGET_KEY_SUPPLIER,
+                                               targetKeySupplier)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
     default Consumer<Object> targetObjectConsumer() {
 
         return (Consumer<Object>) property(PropertyKey.TARGET_OBJECT_CONSUMER)
@@ -462,6 +596,44 @@ public interface FileContext {
 
         return (Consumer<Object>) property(PropertyKey.TARGET_OBJECT_CONSUMER,
                                            targetObjectConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<OutputStream> targetStreamConsumer() {
+
+        return (Consumer<OutputStream>) property(
+            PropertyKey.TARGET_STREAM_CONSUMER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Consumer<OutputStream> targetStreamConsumer(
+        final Consumer<OutputStream> targetStreamConsumer) {
+
+        return (Consumer<OutputStream>) property(
+            PropertyKey.TARGET_STREAM_CONSUMER, targetStreamConsumer)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<OutputStream> targetStreamSupplier() {
+
+        return (Supplier<OutputStream>) property(
+            PropertyKey.TARGET_STREAM_SUPPLIER)
+            .orElse(null);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    default Supplier<OutputStream> targetStreamSupplier(
+        final Supplier<OutputStream> targetStreamSupplier) {
+
+        return (Supplier<OutputStream>) property(
+            PropertyKey.TARGET_STREAM_SUPPLIER, targetStreamSupplier)
             .orElse(null);
     }
 

@@ -18,9 +18,8 @@
 package com.github.jinahya.simple.file.back;
 
 
-import com.google.inject.AbstractModule;
-import com.google.inject.name.Names;
 import static java.lang.invoke.MethodHandles.lookup;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -28,20 +27,21 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  *
  * @author Jin Kwon &lt;jinahya_at_gmail.com&gt;
+ * @param <T> ftp client type parameter
  */
-public class FileBackModule extends AbstractModule {
-
-
-    @Override
-    protected void configure() {
-
-        bind(FileBack.class)
-            .annotatedWith(Names.named("local"))
-            .to(LocalFileBack.class);
-    }
+public abstract class FtpFileBack<T> extends AbstractFileBack {
 
 
     private transient final Logger logger = getLogger(lookup().lookupClass());
+
+
+    /**
+     * The <i>injected</i> client to use. The client instance must be connected
+     * and logged in.
+     */
+    @Inject
+    @FtpClient
+    protected transient T ftpClient;
 
 
 }

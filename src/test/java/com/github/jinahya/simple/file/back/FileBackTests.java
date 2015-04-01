@@ -62,6 +62,17 @@ public final class FileBackTests {
     }
 
 
+    public static ByteBuffer randomFileKey(final ByteBuffer otherThan) {
+
+        ByteBuffer fileKey;
+        do {
+            fileKey = randomFileKey();
+        } while (otherThan == null || otherThan.equals(fileKey));
+
+        return fileKey;
+    }
+
+
     public static byte[] randomFileBytes() {
 
         final byte[] fileBytes = new byte[current().nextInt(1, 1024)];
